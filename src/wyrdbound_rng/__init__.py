@@ -2,10 +2,10 @@
 Wyrdbound Random Name Generator
 
 A comprehensive random name generator library for tabletop RPGs.
-Generates random names from a corpus of input names by breaking them into syllables 
+Generates random names from a corpus of input names by breaking them into syllables
 and recombining them using various algorithms including Bayesian analysis.
 
-This library is designed for use in wyrdbound, a text-based RPG system that emphasizes 
+This library is designed for use in wyrdbound, a text-based RPG system that emphasizes
 narrative and player choice.
 """
 
@@ -26,17 +26,17 @@ from .bayesian_model import BayesianModel
 from .exceptions import FileLoadError, SegmentError
 
 __all__ = [
-    'Generator',
-    'Name', 
-    'GeneratedName',
-    'Syllable',
-    'NameFileLoader',
-    'FantasyNameSegmenter',
-    'JapaneseNameSegmenter',
-    'Evaluator',
-    'Statistics',
-    'SyllableStats',
-    'BayesianModel',
-    'FileLoadError',
-    'SegmentError'
+    "Generator",
+    "Name",
+    "GeneratedName",
+    "Syllable",
+    "NameFileLoader",
+    "FantasyNameSegmenter",
+    "JapaneseNameSegmenter",
+    "Evaluator",
+    "Statistics",
+    "SyllableStats",
+    "BayesianModel",
+    "FileLoadError",
+    "SegmentError",
 ]

@@ -5,10 +5,10 @@ from wyrdbound_rng.segmenters.syllable_segmenter_base import SyllableSegmenterBa
 
 class DummySegmenter(SyllableSegmenterBase):
     """Dummy segmenter for testing the base class functionality."""
-    
-    _initials = ['r', 'n', 'm', 'g', 'th']
-    _inners = ['a', 'e', 'i', 'o', 'ie']
-    _finals = ['n', 'l', 'g', 'r', 'b', 'th', '']
+
+    _initials = ["r", "n", "m", "g", "th"]
+    _inners = ["a", "e", "i", "o", "ie"]
+    _finals = ["n", "l", "g", "r", "b", "th", ""]
 
     @classmethod
     def initials(cls):
@@ -57,13 +57,11 @@ class TestSyllableSegmenterBase:
         orig_initials = DummySegmenter.initials().copy()
         orig_inners = DummySegmenter.inners().copy()
         orig_finals = DummySegmenter.finals().copy()
-        
+
         DummySegmenter.init_syllable_matching(
-            DummySegmenter._initials,
-            DummySegmenter._inners,
-            DummySegmenter._finals
+            DummySegmenter._initials, DummySegmenter._inners, DummySegmenter._finals
         )
-        
+
         assert DummySegmenter._initials != orig_initials
         assert DummySegmenter._inners != orig_inners
         assert DummySegmenter._finals != orig_finals
@@ -72,18 +70,16 @@ class TestSyllableSegmenterBase:
         """Test extracting the last syllable from various names."""
         # Initialize syllable matching first
         DummySegmenter.init_syllable_matching(
-            DummySegmenter._initials,
-            DummySegmenter._inners,
-            DummySegmenter._finals
+            DummySegmenter._initials, DummySegmenter._inners, DummySegmenter._finals
         )
-        
+
         test_cases = {
-            'Thorin': Syllable('r', 'i', 'n'),
-            'Abareth': Syllable('r', 'e', 'th'),
-            'Gilthoniel': Syllable('n', 'ie', 'l'),
-            'Magena': Syllable('n', 'a', '')
+            "Thorin": Syllable("r", "i", "n"),
+            "Abareth": Syllable("r", "e", "th"),
+            "Gilthoniel": Syllable("n", "ie", "l"),
+            "Magena": Syllable("n", "a", ""),
         }
-        
+
         for name, expected_syllable in test_cases.items():
             result = DummySegmenter.extract_last_syllable(name)
             assert result.initial == expected_syllable.initial
@@ -93,12 +89,12 @@ class TestSyllableSegmenterBase:
     def test_extract_first_syllable(self):
         """Test extracting the first syllable from various names."""
         test_cases = {
-            'Thorin': Syllable('th', 'o', 'r'),
-            'Abareth': Syllable('', 'a', 'b'),
-            'Gilthoniel': Syllable('g', 'i', 'l'),
-            'Magena': Syllable('m', 'a', 'g')
+            "Thorin": Syllable("th", "o", "r"),
+            "Abareth": Syllable("", "a", "b"),
+            "Gilthoniel": Syllable("g", "i", "l"),
+            "Magena": Syllable("m", "a", "g"),
         }
-        
+
         for name, expected_syllable in test_cases.items():
             result = DummySegmenter.extract_first_syllable(name)
             assert result.initial == expected_syllable.initial
