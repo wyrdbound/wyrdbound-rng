@@ -6,7 +6,7 @@ import hashlib
 import os
 import random
 from collections import Counter, defaultdict
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from .cache.cache_adapter import CacheAdapter
 from .cache.json_cache_adapter import JsonCacheAdapter

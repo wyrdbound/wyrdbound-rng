@@ -98,7 +98,7 @@ def main():
     data_file = find_data_file(args.names_file)
     if not data_file:
         print(f"Error: File '{args.names_file}' not found")
-        print(f"Searched in current directory and package data directory")
+        print("Searched in current directory and package data directory")
         sys.exit(1)
 
     try:
