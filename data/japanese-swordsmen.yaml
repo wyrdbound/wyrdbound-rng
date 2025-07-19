@@ -1,0 +1,24 @@
+metadata:
+  description: Japanese names from the Sengoku period (1467-1615) - Swordsmen names
+  segmenter: japanese
+  sources:
+    - https://en.wikipedia.org/wiki/Kenjutsu
+  version: "1.0"
+names:
+  - Akiyama
+  - Bokuden
+  - Bungoro
+  - Hikita
+  - Houzan
+  - Kamiizumi
+  - Kojirou
+  - Miyamoto
+  - Munenori
+  - Munetoshi
+  - Musashi
+  - Nobutsuna
+  - Sasaki
+  - Tadashima
+  - Tsukahara
+  - Tsutsumi
+  - Yagyuu
