@@ -5,17 +5,17 @@ Advanced name generation tool with analysis capabilities.
 
 import argparse
 import json
-import sys
 import os
+import sys
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 # Add the src directory to the path so we can import the package
 sys.path.insert(
     0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src")
 )
 
-from wyrdbound_rng import Generator, FantasyNameSegmenter, JapaneseNameSegmenter
+from wyrdbound_rng import FantasyNameSegmenter, Generator, JapaneseNameSegmenter
 
 
 def find_data_file(filename: str) -> Optional[str]:

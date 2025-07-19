@@ -2,8 +2,8 @@
 Base class for syllable segmentation algorithms.
 """
 
-from ..syllable import Syllable
 from ..exceptions import SegmentError
+from ..syllable import Syllable
 
 
 class SyllableSegmenterBase:

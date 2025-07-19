@@ -2,10 +2,12 @@
 Tests for the NameFileLoader class.
 """
 
-import pytest
-import tempfile
 import os
-from wyrdbound_rng import NameFileLoader, FantasyNameSegmenter, JapaneseNameSegmenter
+import tempfile
+
+import pytest
+
+from wyrdbound_rng import FantasyNameSegmenter, JapaneseNameSegmenter, NameFileLoader
 from wyrdbound_rng.exceptions import FileLoadError
 
 

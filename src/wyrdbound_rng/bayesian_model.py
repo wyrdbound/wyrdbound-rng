@@ -5,10 +5,11 @@ Bayesian model for computing syllable transition probabilities.
 import hashlib
 import os
 import random
-from collections import defaultdict, Counter
-from typing import List, Dict, Tuple, Optional
-from .cache.json_cache_adapter import JsonCacheAdapter
+from collections import Counter, defaultdict
+from typing import Dict, List, Optional, Tuple
+
 from .cache.cache_adapter import CacheAdapter
+from .cache.json_cache_adapter import JsonCacheAdapter
 
 
 class BayesianModel:

@@ -1,4 +1,5 @@
 import pytest
+
 from wyrdbound_rng.segmenters.japanese_name_segmenter import JapaneseNameSegmenter
 
 

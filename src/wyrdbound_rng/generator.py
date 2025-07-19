@@ -5,10 +5,11 @@ Main generator class for creating random names.
 import random
 import re
 from typing import Dict
-from .name_file_loader import NameFileLoader
-from .generated_name import GeneratedName
-from .segmenters.fantasy_name_segmenter import FantasyNameSegmenter
+
 from .bayesian_model import BayesianModel
+from .generated_name import GeneratedName
+from .name_file_loader import NameFileLoader
+from .segmenters.fantasy_name_segmenter import FantasyNameSegmenter
 
 
 class Generator:

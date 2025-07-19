@@ -1,6 +1,7 @@
 import pytest
-from wyrdbound_rng.syllable import Syllable
+
 from wyrdbound_rng.segmenters.syllable_segmenter_base import SyllableSegmenterBase
+from wyrdbound_rng.syllable import Syllable
 
 
 class DummySegmenter(SyllableSegmenterBase):

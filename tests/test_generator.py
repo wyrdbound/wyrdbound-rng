@@ -3,7 +3,8 @@ Tests for the Generator class.
 """
 
 import pytest
-from wyrdbound_rng import Generator, GeneratedName
+
+from wyrdbound_rng import GeneratedName, Generator
 
 
 class TestGenerator:

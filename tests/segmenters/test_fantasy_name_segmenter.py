@@ -3,6 +3,7 @@ Tests for the FantasyNameSegmenter class.
 """
 
 import pytest
+
 from wyrdbound_rng.segmenters import FantasyNameSegmenter
 
 

@@ -1,4 +1,5 @@
 import pytest
+
 from wyrdbound_rng.statistics import Statistics
 
 

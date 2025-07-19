@@ -4,7 +4,8 @@ JSON-based cache adapter for storing probability data.
 
 import json
 import os
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 from .cache_adapter import CacheAdapter
 
 

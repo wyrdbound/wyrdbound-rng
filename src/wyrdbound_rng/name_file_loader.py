@@ -3,10 +3,11 @@ Name file loader for loading names from YAML files.
 """
 
 import os
+
+from .exceptions import FileLoadError
 from .name import Name
 from .segmenters.fantasy_name_segmenter import FantasyNameSegmenter
 from .segmenters.japanese_name_segmenter import JapaneseNameSegmenter
-from .exceptions import FileLoadError
 
 try:
     import yaml

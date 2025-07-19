@@ -2,8 +2,9 @@
 Test configuration and fixtures for the wyrdbound-rng package tests.
 """
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 # Get the test data directory
 TEST_DIR = Path(__file__).parent

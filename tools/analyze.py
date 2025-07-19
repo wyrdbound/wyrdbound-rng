@@ -4,8 +4,8 @@ Corpus analysis tool for name generation.
 """
 
 import argparse
-import sys
 import os
+import sys
 from collections import Counter
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -15,7 +15,7 @@ sys.path.insert(
     0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src")
 )
 
-from wyrdbound_rng import Generator, FantasyNameSegmenter, JapaneseNameSegmenter
+from wyrdbound_rng import FantasyNameSegmenter, Generator, JapaneseNameSegmenter
 
 
 def find_data_file(filename: str) -> Optional[str]:
