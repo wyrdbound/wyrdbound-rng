@@ -2,6 +2,8 @@
 Japanese name segmenter using Japanese phonetic rules.
 """
 
+import re
+
 from ..syllable import Syllable
 from .syllable_segmenter_base import SyllableSegmenterBase
 

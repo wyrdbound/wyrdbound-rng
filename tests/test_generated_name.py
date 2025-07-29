@@ -2,6 +2,8 @@
 Tests for the GeneratedName class.
 """
 
+import pytest
+
 from wyrdbound_rng import FantasyNameSegmenter, GeneratedName
 
 

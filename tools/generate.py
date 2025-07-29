@@ -8,7 +8,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 # Add the src directory to the path so we can import the package
 sys.path.insert(
@@ -84,7 +84,7 @@ def main():
     data_file = find_data_file(args.names_file)
     if not data_file:
         print(f"Error: File '{args.names_file}' not found")
-        print("Searched in current directory and data directory")
+        print(f"Searched in current directory and data directory")
         sys.exit(1)
 
     try:

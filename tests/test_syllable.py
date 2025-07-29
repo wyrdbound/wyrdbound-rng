@@ -2,6 +2,8 @@
 Tests for the Syllable class.
 """
 
+import pytest
+
 from wyrdbound_rng import Syllable
 
 

@@ -3,6 +3,9 @@
 Test script for the updated YAML name file loader.
 """
 
+import os
+import sys
+
 from wyrdbound_rng.name_file_loader import NameFileLoader
 
 
