@@ -6,7 +6,7 @@ import hashlib
 import os
 import random
 from collections import Counter, defaultdict
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from .cache.cache_adapter import CacheAdapter
 from .cache.json_cache_adapter import JsonCacheAdapter
@@ -26,7 +26,8 @@ class BayesianModel:
         Initialize the Bayesian model.
 
         Args:
-            cache_adapter (Optional[CacheAdapter]): Cache adapter for storing probabilities
+            cache_adapter (Optional[CacheAdapter]): Cache adapter for storing
+                probabilities
         """
         self.cache_adapter = cache_adapter or JsonCacheAdapter()
 
@@ -130,7 +131,8 @@ class BayesianModel:
         # Try to load from cache first
         if self._load_from_cache(cache_key):
             print(
-                f"Loaded Bayesian probabilities from cache ({len(self.syllables)} syllables)"
+                f"Loaded Bayesian probabilities from cache "
+                f"({len(self.syllables)} syllables)"
             )
             return
 
@@ -138,9 +140,9 @@ class BayesianModel:
 
         # Extract all syllables and build transition counts
         syllable_set = set()
-        bigram_counts = defaultdict(Counter)
-        start_counts = Counter()
-        end_counts = Counter()
+        bigram_counts: Dict[str, Counter] = defaultdict(Counter)
+        start_counts: Counter = Counter()
+        end_counts: Counter = Counter()
 
         for name in names:
             name_syllables = [str(syl) for syl in name.syllables]
@@ -163,7 +165,7 @@ class BayesianModel:
                 next_syl = name_syllables[i + 1]
                 bigram_counts[current_syl][next_syl] += 1
 
-        self.syllables = sorted(list(syllable_set))
+        self.syllables = sorted(syllable_set)
         vocab_size = len(self.syllables)
 
         # Convert counts to probabilities with Laplace smoothing
@@ -321,7 +323,7 @@ class BayesianModel:
 
         return normalized_probability
 
-    def get_probability_info(self, syllable: str) -> Dict[str, float]:
+    def get_probability_info(self, syllable: str) -> Dict[str, Union[float, str]]:
         """
         Get probability information for a specific syllable.
 
@@ -329,12 +331,12 @@ class BayesianModel:
             syllable (str): The syllable to get info for
 
         Returns:
-            Dict[str, float]: Dictionary with probability information
+            Dict[str, Union[float, str]]: Dictionary with probability information
         """
         if not self._is_trained:
             return {}
 
-        info = {
+        info: Dict[str, Union[float, str]] = {
             "start_probability": self.start_probs.get(syllable, 0.0),
             "end_probability": self.end_probs.get(syllable, 0.0),
         }
@@ -346,6 +348,6 @@ class BayesianModel:
         )
 
         for i, (next_syl, prob) in enumerate(sorted_transitions[:5]):
-            info[f"top_transition_{i+1}"] = f"{next_syl} ({prob:.3f})"
+            info[f"top_transition_{i + 1}"] = f"{next_syl} ({prob:.3f})"
 
         return info

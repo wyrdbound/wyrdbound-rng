@@ -1,0 +1,98 @@
+name: CLI Tools Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  cli-tools-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Create virtual environment
+        run: python -m venv .venv
+
+      - name: Install dependencies
+        run: |
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+        shell: bash
+
+      - name: Test main CLI command
+        run: |
+          source .venv/bin/activate
+          # Test version command
+          wyrdbound-rng --version
+
+          # Test help command
+          wyrdbound-rng --help
+
+          # Test basic generation with built-in lists
+          wyrdbound-rng -l generic-fantasy -n 5
+          wyrdbound-rng -l japanese-sengoku -n 3 -s japanese
+
+          # Test different algorithms
+          wyrdbound-rng -l generic-fantasy -a simple -n 2
+          wyrdbound-rng -l generic-fantasy -a bayesian -n 2
+          wyrdbound-rng -l generic-fantasy -a very_simple -n 2
+
+          # Test analysis features
+          wyrdbound-rng -l generic-fantasy --syllables -n 1
+          wyrdbound-rng -l generic-fantasy --show-sources -n 1
+          wyrdbound-rng -l generic-fantasy --show-analysis -n 1
+          wyrdbound-rng -l generic-fantasy --probabilities "ar" -a bayesian
+        shell: bash
+
+      - name: Test advanced tools
+        run: |
+          source .venv/bin/activate
+          # Test analyze tool
+          python tools/analyze.py -l generic-fantasy
+          python tools/analyze.py -l japanese-sengoku -s japanese
+          python tools/analyze.py -l generic-fantasy --json
+
+          # Test generate tool
+          python tools/generate.py -l generic-fantasy -n 5
+          python tools/generate.py -l japanese-sengoku -s japanese -n 3
+          python tools/generate.py -l generic-fantasy -a bayesian -v
+          python tools/generate.py -l generic-fantasy --json -n 2
+        shell: bash
+
+      - name: Test error handling
+        run: |
+          source .venv/bin/activate
+          # Test invalid list (should fail gracefully)
+          wyrdbound-rng -l nonexistent-list -n 1 || echo "Expected failure handled correctly"
+
+          # Test invalid algorithm (should fail gracefully)
+          wyrdbound-rng -l generic-fantasy -a invalid-algorithm -n 1 || echo "Expected failure handled correctly"
+
+          # Test tools with invalid inputs
+          python tools/analyze.py -l nonexistent-list || echo "Expected failure handled correctly"
+          python tools/generate.py -l nonexistent-list -n 1 || echo "Expected failure handled correctly"
+        shell: bash
+
+      - name: Test with custom YAML (if exists)
+        run: |
+          source .venv/bin/activate
+          # Test with data files (these should exist in the repository)
+          if [ -f "data/generic-fantasy.yaml" ]; then
+            wyrdbound-rng -l data/generic-fantasy.yaml -n 2
+            python tools/analyze.py -l data/generic-fantasy.yaml
+          fi
+
+          if [ -f "data/japanese-sengoku.yaml" ]; then
+            wyrdbound-rng -l data/japanese-sengoku.yaml -s japanese -n 2
+            python tools/analyze.py -l data/japanese-sengoku.yaml -s japanese
+          fi
+        shell: bash

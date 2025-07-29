@@ -51,5 +51,5 @@ class Statistics:
             names: List of names to calculate probabilities from
         """
         # For each syllable, calculate the probabilities for it
-        for syllable in self.syllable_stats:
+        for _syllable in self.syllable_stats:
             pass  # Implementation would go here

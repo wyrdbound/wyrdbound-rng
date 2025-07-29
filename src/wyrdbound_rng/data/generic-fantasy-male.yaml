@@ -1,0 +1,24 @@
+metadata:
+  description: Fantasy names with various cultural influences - Male names
+  segmenter: fantasy
+  sources:
+    - original corpus
+  version: "1.0"
+names:
+  - Abaddon
+  - Abakzor
+  - Abatu
+  - Abdiel
+  - Abel
+  - Abigar
+  - Abraxas
+  - Abrog
+  - Adanedel
+  - Adramalech
+  - Adunakor
+  - Aegis
+  - Aegnor
+  - Aerandir
+  - Afrit
+  - Alanzyr
+  - Alastor

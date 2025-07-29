@@ -59,9 +59,9 @@ class JsonCacheAdapter(CacheAdapter):
             return None
 
         try:
-            with open(cache_file, "r", encoding="utf-8") as f:
+            with open(cache_file, encoding="utf-8") as f:
                 return json.load(f)
-        except (json.JSONDecodeError, IOError):
+        except (OSError, json.JSONDecodeError):
             # If file is corrupted or unreadable, treat as cache miss
             return None
 
@@ -78,7 +78,7 @@ class JsonCacheAdapter(CacheAdapter):
         try:
             with open(cache_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
-        except IOError as e:
+        except OSError as e:
             # Log the error but don't crash - caching is optional
             print(f"Warning: Failed to write cache file {cache_file}: {e}")
 
@@ -107,5 +107,5 @@ class JsonCacheAdapter(CacheAdapter):
         if os.path.exists(cache_file):
             try:
                 os.remove(cache_file)
-            except IOError as e:
+            except OSError as e:
                 print(f"Warning: Failed to remove cache file {cache_file}: {e}")

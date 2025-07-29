@@ -26,7 +26,7 @@ def test_yaml_loader():
     # Test Fantasy names (should auto-select Fantasy segmenter)
     print("\n📄 Testing Fantasy names...")
     loader2 = NameFileLoader()
-    names2 = loader2.load("data/generic-fantasy-names.yaml")
+    names2 = loader2.load("data/generic-fantasy.yaml")
     metadata2 = loader2.get_metadata()
 
     print(f"✅ Loaded {len(names2)} names")

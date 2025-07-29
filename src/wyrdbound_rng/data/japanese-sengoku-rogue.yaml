@@ -1,0 +1,33 @@
+metadata:
+  description: Japanese names from the Sengoku period (1467-1615) - Rogue names
+  segmenter: japanese
+  sources:
+    - https://en.wikipedia.org/wiki/Ninja
+  version: "1.0"
+names:
+  - Danzou
+  - Doushun
+  - Fuuma
+  - Goemon
+  - Hanzou
+  - Hattori
+  - Igasaki
+  - Ishikawa
+  - Kagetaka
+  - Katou
+  - Kirigakure
+  - Kotarou
+  - Kouzuki
+  - Magoichi
+  - Magoroku
+  - Mochizuki
+  - Nobusumi
+  - Ohama
+  - Sadayu
+  - Saika
+  - Sasuke
+  - Shigehide
+  - Shigetomo
+  - Shikaemon
+  - Suzuki
+  - Tsuda

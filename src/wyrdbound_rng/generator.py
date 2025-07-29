@@ -9,6 +9,7 @@ from typing import Dict
 from .bayesian_model import BayesianModel
 from .generated_name import GeneratedName
 from .name_file_loader import NameFileLoader
+from .name_list_resolver import resolve_name_list
 from .segmenters.fantasy_name_segmenter import FantasyNameSegmenter
 
 
@@ -17,20 +18,32 @@ class Generator:
     Main class for generating random names from a corpus of input names.
     """
 
-    def __init__(self, filename, segmenter=None):
+    def __init__(self, name_source, segmenter=None):
         """
-        Initialize the generator with a file of names.
+        Initialize the generator with a name source.
 
         Args:
-            filename (str): Path to YAML file containing names
+            name_source (str): Name list identifier (e.g., "generic-fantasy") or
+                path to YAML file
             segmenter: Segmenter class to use (defaults to FantasyNameSegmenter)
+
+        Raises:
+            FileNotFoundError: If the name source cannot be resolved to a valid file
         """
         self.segmenter = segmenter or FantasyNameSegmenter()
-        self.filename = filename
+
+        # Resolve the name source to a file path
+        self.filename = resolve_name_list(name_source)
+        if not self.filename:
+            raise FileNotFoundError(
+                f"Could not resolve name source '{name_source}' to a valid file"
+            )
+
+        self.name_source = name_source  # Store original identifier for reference
 
         # Load the names from file
         loader = NameFileLoader(self.segmenter)
-        self.names = loader.load(filename)
+        self.names = loader.load(self.filename)
 
         # Initialize Bayesian model (lazy loading)
         self.bayesian_model = None
@@ -45,7 +58,8 @@ class Generator:
             n (int): Number of names to generate
             max_chars (int): Maximum character length for names
             algorithm (str): Algorithm to use ('very_simple', 'simple', 'bayesian')
-            min_probability_threshold (float): Minimum probability threshold for bayesian generation
+            min_probability_threshold (float): Minimum probability threshold for
+                bayesian generation
 
         Returns:
             list: List of GeneratedName objects
@@ -74,7 +88,8 @@ class Generator:
         Args:
             max_len (int): Maximum length for the name
             algorithm (str): Algorithm to use
-            min_probability_threshold (float): Minimum probability threshold for bayesian generation
+            min_probability_threshold (float): Minimum probability threshold for
+                bayesian generation
 
         Returns:
             GeneratedName: A generated name object
@@ -199,11 +214,13 @@ class Generator:
 
     def _generate_name_bayesian(self, max_len, min_probability_threshold=1.0e-8):
         """
-        Generate a name using the Bayesian algorithm (probabilistic syllable transitions).
+        Generate a name using the Bayesian algorithm (probabilistic syllable
+        transitions).
 
         Args:
             max_len (int): Maximum length for the name
-            min_probability_threshold (float): Minimum probability threshold for filtering
+            min_probability_threshold (float): Minimum probability threshold for
+                filtering
 
         Returns:
             GeneratedName: A generated name object
@@ -259,7 +276,8 @@ class Generator:
                             full_name, [], self.segmenter, normalized_probability
                         )
                     else:
-                        # Keep track of the best name we've seen, even if below threshold
+                        # Keep track of the best name we've seen, even if below
+                        # threshold
                         if normalized_probability > best_probability:
                             best_name = GeneratedName(
                                 full_name, [], self.segmenter, normalized_probability
@@ -308,7 +326,8 @@ class Generator:
             syllable (str): The syllable to analyze
 
         Returns:
-            Dict: Dictionary with probability information, or empty dict if not available
+            Dict: Dictionary with probability information, or empty dict if not
+                available
         """
         # Initialize Bayesian model if not already done
         if self.bayesian_model is None:
@@ -351,7 +370,7 @@ class Generator:
             for syllable in name.syllables:
                 syllables.add(str(syllable))
 
-        syllables = sorted(list(syllables))
+        syllables = sorted(syllables)
 
         for i, syllable in enumerate(syllables, 1):
             print(f"{i:4}: {syllable}")

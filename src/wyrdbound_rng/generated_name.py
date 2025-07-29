@@ -18,7 +18,8 @@ class GeneratedName(Name):
             name (str): The generated name
             source_names (list): List of source names used in generation
             segmenter: The segmenter to use
-            probability (float, optional): Probability of the name (for Bayesian generation)
+            probability (float, optional): Probability of the name (for Bayesian
+                generation)
         """
         super().__init__(name, segmenter)
         self.source_names = source_names or []

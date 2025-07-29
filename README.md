@@ -4,12 +4,21 @@ A comprehensive random name generator library for tabletop RPGs, designed to cre
 
 This library is designed for use in [wyrdbound](https://github.com/wyrdbound), a text-based RPG system that emphasizes narrative and player choice.
 
+[![CI](https://github.com/wyrdbound/wyrdbound-rng/actions/workflows/ci.yml/badge.svg)](https://github.com/wyrdbound/wyrdbound-rng/actions/workflows/ci.yml)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 > 📣 This library is experimental and was built with much ❤️ and [vibe coding](https://en.wikipedia.org/wiki/Vibe_coding). Perfect for your tabletop RPG adventures, but maybe not for launching :rocket: or performing :brain: surgery! Enjoy!
 
 ## Features
+
+### Simplified Interface
+
+- **Built-in Name Lists**: Reference name corpora using simple identifiers
+- **Auto-Discovery**: Automatically finds built-in name lists without specifying file paths
+- **Flexible Input**: Supports both built-in identifiers and custom file paths
+- **Help Integration**: CLI tools show available built-in name lists in help text
 
 ### Multiple Generation Algorithms
 
@@ -25,8 +34,9 @@ This library is designed for use in [wyrdbound](https://github.com/wyrdbound), a
 
 ### YAML Input Format
 
-- **YAML**: Structured data with metadata support
-- **Mixed Sources**: Combine multiple input files
+- **Built-in Name Lists**: Use simple identifiers for included corpora
+- **Custom YAML Files**: Support for user-provided YAML files with metadata
+- **Mixed Sources**: Combine multiple input files and built-in lists
 
 ### Advanced Analysis
 
@@ -46,8 +56,8 @@ pip install wyrdbound-rng
 ```python
 from wyrdbound_rng import Generator, FantasyNameSegmenter
 
-# Create generator with fantasy name segmenter
-generator = Generator("generic-fantasy-names.yaml", segmenter=FantasyNameSegmenter())
+# Create generator with built-in name list (simple identifier)
+generator = Generator("generic-fantasy", segmenter=FantasyNameSegmenter())
 
 # Generate a name using the simple algorithm
 name = generator.generate_name(max_len=12, algorithm='simple')
@@ -57,41 +67,62 @@ print(name.name)  # "Aldric"
 name = generator.generate_name(max_len=12, algorithm='bayesian')
 print(name.name)  # "Theron"
 print(f"Probability: {name.probability:.2e}")
+
+# You can also use custom YAML files
+custom_generator = Generator("./my-custom-names.yaml")
 ```
 
 ## Command Line Usage
 
 ```bash
-# Generate 5 names from a built-in YAML file (just use the filename)
-wyrdbound-rng generic-fantasy-names.yaml
+# Generate 5 names using built-in name list identifier
+wyrdbound-rng --list generic-fantasy
 
 # Generate 10 names with Bayesian algorithm
-wyrdbound-rng japanese-sengoku-names.yaml -n 10 -a bayesian
+wyrdbound-rng --list japanese-sengoku -n 10 -a bayesian --segmenter japanese
 
 # Show syllable breakdown and sources
-wyrdbound-rng generic-fantasy-names.yaml --syllables --show-sources
+wyrdbound-rng --list generic-fantasy --syllables --show-sources
 
 # Show analysis info: corpus existence for all algorithms, plus probability for Bayesian
-wyrdbound-rng generic-fantasy-names.yaml --show-analysis
+wyrdbound-rng --list generic-fantasy --show-analysis
 
 # Bayesian algorithm with full analysis (probability + corpus existence)
-wyrdbound-rng generic-fantasy-names.yaml --show-analysis -a bayesian
+wyrdbound-rng --list generic-fantasy --show-analysis -a bayesian
 
 # Analyze probability for specific syllables
-wyrdbound-rng generic-fantasy-names.yaml --probabilities "ar" -a bayesian
+wyrdbound-rng --list generic-fantasy --probabilities "ar" -a bayesian
 
-# You can also use full paths to your own YAML files
-wyrdbound-rng /path/to/your/custom-names.yaml
+# You can also use custom YAML files
+wyrdbound-rng --list /path/to/your/custom-names.yaml
+wyrdbound-rng --list ./my-names.yaml
 ```
 
 ## Supported Name Corpora
 
-The library comes with several built-in name corpora located in the `data/` directory:
+The library comes with several built-in name corpora. You can reference them using simple identifiers:
 
-- **Generic Fantasy**: Traditional Western fantasy names (male/female)
-- **Japanese Sengoku**: Historical Japanese names from the Sengoku period
-- **Warhammer 40k**: Space Marine chapter names
-- **Extensible**: Easy to add your own YAML files
+### Built-in Name Lists
+
+- `generic-fantasy` - Traditional Western fantasy names (mixed)
+- `generic-fantasy-male` - Traditional Western fantasy male names
+- `generic-fantasy-female` - Traditional Western fantasy female names
+- `japanese-sengoku` - Historical Japanese names from the Sengoku period (mixed)
+- `japanese-sengoku-clan` - Japanese Sengoku clan names
+- `japanese-sengoku-daimyo` - Japanese Sengoku daimyo names
+- `japanese-sengoku-religious` - Japanese Sengoku religious names
+- `japanese-sengoku-rogue` - Japanese Sengoku rogue names
+- `japanese-sengoku-samurai` - Japanese Sengoku samurai names
+- `japanese-sengoku-women` - Japanese Sengoku women names
+- `japanese-swordsmen` - Japanese swordsmen names
+- `warhammer40k-space-marine-names` - Warhammer 40k Space Marine names
+
+### Custom Files
+
+You can also provide your own YAML files using relative or absolute paths:
+
+- `./my-names.yaml` - Relative path
+- `/absolute/path/to/names.yaml` - Absolute path
 
 ## API Reference
 
@@ -102,11 +133,11 @@ The library comes with several built-in name corpora located in the `data/` dire
 The main entry point for name generation.
 
 ```python
-Generator(filename, segmenter=None)
+Generator(name_source, segmenter=None)
 ```
 
-- `filename`: Path to YAML file containing names
-- `segmenter`: Syllable segmentation strategy (optional)
+- `name_source`: Built-in name list identifier (e.g., "generic-fantasy") or path to YAML file
+- `segmenter`: Syllable segmentation strategy (optional, auto-detected from YAML metadata)
 
 **Methods:**
 
@@ -168,11 +199,12 @@ Each entry in the `names` list represents a name. The `metadata` section provide
 ### Generate Names
 
 ```bash
-wyrdbound-rng <names_file> [options]
+wyrdbound-rng --list <name_source> [options]
 
 Options:
+  -l, --list SOURCE     Built-in name list identifier or path to YAML file (required)
   -n, --number N        Number of names to generate (default: 5)
-  -l, --length N        Maximum name length (default: 12)
+  --length N            Maximum name length (default: 12)
   -a, --algorithm ALG   Algorithm: simple, bayesian, very_simple (default: simple)
   -s, --segmenter SEG   Segmenter: fantasy, japanese (default: fantasy)
   --show-sources        Show source names used in generation
@@ -189,9 +221,10 @@ The `tools/` directory contains additional command-line utilities for advanced a
 #### Corpus Analysis Tool
 
 ```bash
-python tools/analyze.py <names_file> [options]
+python tools/analyze.py --list <name_source> [options]
 
 Options:
+  -l, --list SOURCE     Built-in name list identifier or path to YAML file (required)
   -s, --segmenter SEG   Segmenter: fantasy, japanese (default: fantasy)
   -v, --verbose         Show detailed analysis including name/syllable length statistics
   --top-syllables N     Number of top syllables to show (default: 20)
@@ -202,21 +235,25 @@ Options:
 
 ```bash
 # Basic analysis
-python tools/analyze.py generic-fantasy-names.yaml
+python tools/analyze.py --list generic-fantasy
 
 # Detailed analysis with top 30 syllables
-python tools/analyze.py japanese-sengoku-names.yaml -v --top-syllables 30 -s japanese
+python tools/analyze.py --list japanese-sengoku -v --top-syllables 30 -s japanese
 
 # JSON output for data processing
-python tools/analyze.py generic-fantasy-names.yaml --json > analysis.json
+python tools/analyze.py --list generic-fantasy --json > analysis.json
+
+# Analyze custom file
+python tools/analyze.py --list ./my-names.yaml
 ```
 
 #### Advanced Generation Tool
 
 ```bash
-python tools/generate.py <names_file> [options]
+python tools/generate.py --list <name_source> [options]
 
 Options:
+  -l, --list SOURCE     Built-in name list identifier or path to YAML file (required)
   -n, --count N         Number of names to generate (default: 1)
   -a, --algorithm ALG   Algorithm: simple, bayesian, very_simple (default: simple)
   -s, --segmenter SEG   Segmenter: fantasy, japanese (default: fantasy)
@@ -230,13 +267,16 @@ Options:
 
 ```bash
 # Generate single name with detailed info
-python tools/generate.py generic-fantasy-names.yaml -v -a bayesian
+python tools/generate.py --list generic-fantasy -v -a bayesian
 
 # Generate 5 names as JSON for data processing
-python tools/generate.py japanese-sengoku-names.yaml -n 5 --json -s japanese
+python tools/generate.py --list japanese-sengoku -n 5 --json -s japanese
 
 # Batch generation with custom parameters
-python tools/generate.py generic-fantasy-names.yaml -n 100 -a bayesian --min-probability 1e-6
+python tools/generate.py --list generic-fantasy -n 100 -a bayesian --min-probability 1e-6
+
+# Use custom file
+python tools/generate.py --list ./my-names.yaml -n 5
 ```
 
 ## Examples
@@ -246,13 +286,16 @@ python tools/generate.py generic-fantasy-names.yaml -n 100 -a bayesian --min-pro
 ```python
 from wyrdbound_rng import Generator, FantasyNameSegmenter
 
-# Create generator
-generator = Generator("generic-fantasy-names.yaml", segmenter=FantasyNameSegmenter())
+# Create generator using built-in name list
+generator = Generator("generic-fantasy", segmenter=FantasyNameSegmenter())
 
 # Generate names
 for i in range(5):
     name = generator.generate_name(max_len=12, algorithm='simple')
     print(f"{i+1}. {name.name}")
+
+# You can also use custom files
+custom_generator = Generator("./my-names.yaml")
 ```
 
 ### Advanced Analysis
@@ -270,13 +313,17 @@ if hasattr(name, 'source_names') and name.source_names:
 ### Multiple Corpora
 
 ```python
-# Load from multiple sources by creating separate generators
-generator1 = Generator("generic-fantasy-male.yaml")
-generator2 = Generator("generic-fantasy-female.yaml")
+# Load from multiple built-in sources by creating separate generators
+generator1 = Generator("generic-fantasy-male")
+generator2 = Generator("generic-fantasy-female")
 
 # Generate names from each corpus
 male_names = [generator1.generate_name(max_len=12) for _ in range(5)]
 female_names = [generator2.generate_name(max_len=12) for _ in range(5)]
+
+# Mix built-in and custom sources
+japanese_gen = Generator("japanese-sengoku")
+custom_gen = Generator("./my-custom-names.yaml")
 ```
 
 ## Development
@@ -288,6 +335,10 @@ female_names = [generator2.generate_name(max_len=12) for _ in range(5)]
 git clone https://github.com/wyrdbound/wyrdbound-rng.git
 cd wyrdbound-rng
 
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
 # Install with development dependencies
 pip install -e ".[dev]"
 ```
@@ -295,7 +346,7 @@ pip install -e ".[dev]"
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run all tests (ensure .venv is activated)
 python -m pytest tests/
 
 # Run with coverage
@@ -308,14 +359,12 @@ python -m pytest tests/ --cov=wyrdbound_rng --cov-report=html
 ### Code Quality
 
 ```bash
-# Format code
-black src/ tests/ tools/
+# Lint and format with Ruff (ensure .venv is activated)
+ruff check src/ tests/ tools/
+ruff format src/ tests/ tools/
 
-# Sort imports
-isort src/ tests/ tools/
-
-# Lint code
-flake8 src/ tests/ tools/
+# Or run both together
+ruff check --fix src/ tests/ tools/
 ```
 
 ## Contributing

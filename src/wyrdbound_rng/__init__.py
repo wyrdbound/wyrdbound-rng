@@ -9,7 +9,7 @@ This library is designed for use in wyrdbound, a text-based RPG system that emph
 narrative and player choice.
 """
 
-__version__ = "1.0.0"
+__version__ = "0.0.1"
 __author__ = "The Wyrd One"
 
 from .bayesian_model import BayesianModel
@@ -19,6 +19,7 @@ from .generated_name import GeneratedName
 from .generator import Generator
 from .name import Name
 from .name_file_loader import NameFileLoader
+from .name_list_resolver import get_available_name_lists, resolve_name_list
 from .segmenters.fantasy_name_segmenter import FantasyNameSegmenter
 from .segmenters.japanese_name_segmenter import JapaneseNameSegmenter
 from .statistics import Statistics
@@ -39,4 +40,6 @@ __all__ = [
     "BayesianModel",
     "FileLoadError",
     "SegmentError",
+    "get_available_name_lists",
+    "resolve_name_list",
 ]

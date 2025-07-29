@@ -25,17 +25,17 @@ class TestJapaneseNameSegmenter:
             syllables = JapaneseNameSegmenter.segment(name)
             assert syllables is not None
             assert isinstance(syllables, list)
-            assert (
-                len(syllables) == 2
-            ), f"{name} should be 2 syllables, got {len(syllables)}: {[str(s) for s in syllables]}"
+            assert len(syllables) == 2, (
+                f"{name} should be 2 syllables, got {len(syllables)}: {[str(s) for s in syllables]}"
+            )
 
         for name in single_syllable_names:
             syllables = JapaneseNameSegmenter.segment(name)
             assert syllables is not None
             assert isinstance(syllables, list)
-            assert (
-                len(syllables) == 1
-            ), f"{name} should be 1 syllable, got {len(syllables)}: {[str(s) for s in syllables]}"
+            assert len(syllables) == 1, (
+                f"{name} should be 1 syllable, got {len(syllables)}: {[str(s) for s in syllables]}"
+            )
 
     def test_segment_triple_syllable_names(self):
         """Test segmenting triple syllable names."""
@@ -61,17 +61,17 @@ class TestJapaneseNameSegmenter:
             syllables = JapaneseNameSegmenter.segment(name)
             assert syllables is not None
             assert isinstance(syllables, list)
-            assert (
-                len(syllables) == 4
-            ), f"{name} should be 4 syllables, got {len(syllables)}: {[str(s) for s in syllables]}"
+            assert len(syllables) == 4, (
+                f"{name} should be 4 syllables, got {len(syllables)}: {[str(s) for s in syllables]}"
+            )
 
         for name in three_syllable_names:
             syllables = JapaneseNameSegmenter.segment(name)
             assert syllables is not None
             assert isinstance(syllables, list)
-            assert (
-                len(syllables) == 3
-            ), f"{name} should be 3 syllables, got {len(syllables)}: {[str(s) for s in syllables]}"
+            assert len(syllables) == 3, (
+                f"{name} should be 3 syllables, got {len(syllables)}: {[str(s) for s in syllables]}"
+            )
 
     def test_segment_long_names(self):
         """Test segmenting very long names."""
@@ -87,17 +87,17 @@ class TestJapaneseNameSegmenter:
             syllables = JapaneseNameSegmenter.segment(name)
             assert syllables is not None
             assert isinstance(syllables, list)
-            assert (
-                len(syllables) >= 5
-            ), f"{name} should be >=5 syllables, got {len(syllables)}: {[str(s) for s in syllables]}"
+            assert len(syllables) >= 5, (
+                f"{name} should be >=5 syllables, got {len(syllables)}: {[str(s) for s in syllables]}"
+            )
 
         for name in medium_names:
             syllables = JapaneseNameSegmenter.segment(name)
             assert syllables is not None
             assert isinstance(syllables, list)
-            assert (
-                len(syllables) == 3
-            ), f"{name} should be 3 syllables, got {len(syllables)}: {[str(s) for s in syllables]}"
+            assert len(syllables) == 3, (
+                f"{name} should be 3 syllables, got {len(syllables)}: {[str(s) for s in syllables]}"
+            )
 
     def test_segment_non_overlapping_non_empty_syllables(self):
         """Test that segmentation produces non-overlapping, non-empty syllables."""
@@ -119,8 +119,8 @@ class TestJapaneseNameSegmenter:
         syllables = JapaneseNameSegmenter.segment("Gen'i")
         assert syllables is not None
         assert isinstance(syllables, list)
-        assert (
-            len(syllables) == 2
-        ), f"Gen'i should be 2 syllables, got {len(syllables)}: {[str(s) for s in syllables]}"
+        assert len(syllables) == 2, (
+            f"Gen'i should be 2 syllables, got {len(syllables)}: {[str(s) for s in syllables]}"
+        )
         assert str(syllables[0]) == "gen"
         assert str(syllables[1]) == "'i"

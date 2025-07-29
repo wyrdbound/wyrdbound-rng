@@ -1,0 +1,25 @@
+metadata:
+  description: Japanese names from the Sengoku period (1467-1615) - Religious names
+  segmenter: japanese
+  sources:
+    - original corpus
+  version: "1.0"
+names:
+  - Choro
+  - Chuko
+  - Ekei
+  - Honinbo
+  - Ishin
+  - Jion
+  - Nankoubou
+  - Nikkai
+  - Rairen
+  - Rairyuu
+  - Rennyo
+  - Sansa
+  - Sessai
+  - Shimozuma
+  - Souhou
+  - Suuden
+  - Takuan
+  - Tenkai

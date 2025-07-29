@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wyrdbound-rng"
-version = "1.0.0"
+version = "0.0.1"
 description = "A comprehensive random name generator library for tabletop RPGs"
 readme = "README.md"
 license = {text = "MIT"}
@@ -39,9 +39,8 @@ dependencies = [
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
-    "black>=23.0.0",
-    "isort>=5.12.0",
-    "flake8>=6.0.0",
+    "ruff>=0.1.0",
+    "types-PyYAML>=6.0.0",
 ]
 
 [project.urls]
@@ -54,7 +53,7 @@ Documentation = "https://github.com/wyrdbound/wyrdbound-rng#readme"
 wyrdbound-rng = "wyrdbound_rng.cli:main"
 
 [tool.setuptools.package-data]
-wyrdbound_rng = ["py.typed"]
+wyrdbound_rng = ["py.typed", "data/*.yaml"]
 
 [tool.setuptools]
 include-package-data = true
@@ -66,13 +65,35 @@ include = ["wyrdbound_rng*"]
 [tool.setuptools.package-dir]
 "" = "src"
 
-[tool.black]
+[tool.ruff]
 line-length = 88
-target-version = ['py38']
+target-version = "py38"
 
-[tool.isort]
-profile = "black"
-line_length = 88
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E501"]
+
+[tool.ruff.format]
+# Use ruff's formatter, which is compatible with black
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
