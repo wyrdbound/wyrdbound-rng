@@ -48,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Extensible architecture for adding new segmenters
 - **Quality Assurance**:
   - Comprehensive test suite with pytest
-  - Development tools integration (black, isort, flake8)
+  - Development tools integration (black, ruff)
   - Memory-efficient syllable processing
   - Comprehensive error handling and validation
 

@@ -4,13 +4,10 @@ Command-line interface for the Wyrdbound Random Name Generator.
 """
 
 import argparse
-import os
 import sys
-from pathlib import Path
-from typing import Optional
 
 from .generator import Generator
-from .name_list_resolver import format_available_lists, get_available_name_lists
+from .name_list_resolver import format_available_lists
 from .segmenters.fantasy_name_segmenter import FantasyNameSegmenter
 from .segmenters.japanese_name_segmenter import JapaneseNameSegmenter
 
@@ -80,7 +77,7 @@ def main():
         metavar="SYLLABLE",
         help="Show probability information for a specific syllable (requires bayesian algorithm)",
     )
-    parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
+    parser.add_argument("--version", action="version", version="%(prog)s 0.0.1")
 
     args = parser.parse_args()
 
@@ -96,7 +93,7 @@ def main():
 
         if args.syllables:
             print("\n=== Syllable Breakdown (first 10 names) ===")
-            for i, name in enumerate(generator.names[:10]):
+            for _i, name in enumerate(generator.names[:10]):
                 print(f"{name.name}: {' | '.join([str(s) for s in name.syllables])}")
             print()
 
@@ -155,7 +152,7 @@ def main():
                 min_probability_threshold=args.min_probability,
             )
 
-            output = f"{i+1}. {name.name}"
+            output = f"{i + 1}. {name.name}"
 
             if (
                 args.show_sources

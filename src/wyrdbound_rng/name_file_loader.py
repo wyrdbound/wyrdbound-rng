@@ -13,11 +13,11 @@ try:
     import yaml
 
     YAML_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     YAML_AVAILABLE = False
     raise ImportError(
         "PyYAML is required for name file loading. Install with: pip install PyYAML"
-    )
+    ) from e
 
 
 class NameFileLoader:
@@ -79,7 +79,7 @@ class NameFileLoader:
         self.metadata = {}
 
         try:
-            with open(file_path, "r", encoding="utf-8") as yaml_file:
+            with open(file_path, encoding="utf-8") as yaml_file:
                 data = yaml.safe_load(yaml_file)
 
                 if not isinstance(data, dict):
@@ -113,9 +113,11 @@ class NameFileLoader:
                         self.names.append(name)
 
         except yaml.YAMLError as e:
-            raise FileLoadError(f"Error parsing YAML file '{file_path}': {str(e)}")
+            raise FileLoadError(
+                f"Error parsing YAML file '{file_path}': {str(e)}"
+            ) from e
         except Exception as e:
-            raise FileLoadError(f"Error reading file '{file_path}': {str(e)}")
+            raise FileLoadError(f"Error reading file '{file_path}': {str(e)}") from e
 
         # Sort names alphabetically
         self.names.sort(key=lambda n: n.name)

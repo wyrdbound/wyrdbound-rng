@@ -1,5 +1,3 @@
-import pytest
-
 from wyrdbound_rng.syllable_stats import SyllableStats
 
 

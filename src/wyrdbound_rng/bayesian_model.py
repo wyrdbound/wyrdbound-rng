@@ -6,7 +6,7 @@ import hashlib
 import os
 import random
 from collections import Counter, defaultdict
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from .cache.cache_adapter import CacheAdapter
 from .cache.json_cache_adapter import JsonCacheAdapter
@@ -163,7 +163,7 @@ class BayesianModel:
                 next_syl = name_syllables[i + 1]
                 bigram_counts[current_syl][next_syl] += 1
 
-        self.syllables = sorted(list(syllable_set))
+        self.syllables = sorted(syllable_set)
         vocab_size = len(self.syllables)
 
         # Convert counts to probabilities with Laplace smoothing
@@ -346,6 +346,6 @@ class BayesianModel:
         )
 
         for i, (next_syl, prob) in enumerate(sorted_transitions[:5]):
-            info[f"top_transition_{i+1}"] = f"{next_syl} ({prob:.3f})"
+            info[f"top_transition_{i + 1}"] = f"{next_syl} ({prob:.3f})"
 
         return info

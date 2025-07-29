@@ -173,67 +173,27 @@ class SyllableSegmenterBase:
 
         return beginning + ending
 
-    @classmethod
-    def segment(cls, name):
-        """Segment a name into syllables using class methods (Ruby-compatible interface)."""
-        beginning = []
-        ending = []
-
-        orig_name = name.lower()
-        current_name = orig_name
-
-        passes = 0
-        while current_name:
-            if passes >= 50:
-                raise SegmentError(orig_name, current_name)
-
-            # Extract the last syllable
-            last_syllable = cls.extract_last_syllable(current_name)
-
-            # Add the new syllable to the front of ending (working backward from the ending)
-            ending.insert(0, last_syllable)
-
-            # Remove the last syllable from the name string
-            current_name = current_name[: -len(str(last_syllable))]
-
-            # If there was only one syllable, we are done
-            if not current_name:
-                break
-
-            # Extract the first syllable
-            first_syllable = cls.extract_first_syllable(current_name)
-
-            # Add the new syllable to the end of beginning (working forward from the beginning)
-            beginning.append(first_syllable)
-
-            # Remove the first syllable from the name string
-            current_name = current_name[len(str(first_syllable)) :]
-
-            passes += 1
-
-        return beginning + ending
-
     def _extract_first_syllable(self, name):
         """Extract the first syllable from a name."""
         initial = inner = final = ""
         remaining = name.lower()
 
         # Find initial consonant
-        for sound in self.initials:
+        for sound in self.initials():
             if remaining.startswith(sound):
                 initial = sound
                 remaining = remaining[len(sound) :]
                 break
 
         # Find inner vowel
-        for sound in self.inners:
+        for sound in self.inners():
             if remaining.startswith(sound):
                 inner = sound
                 remaining = remaining[len(sound) :]
                 break
 
         # Find final consonant
-        for sound in self.finals:
+        for sound in self.finals():
             if remaining.startswith(sound):
                 final = sound
                 remaining = remaining[len(sound) :]
@@ -247,21 +207,21 @@ class SyllableSegmenterBase:
         remaining = name.lower()
 
         # Find final consonant
-        for sound in self.finals:
+        for sound in self.finals():
             if remaining.endswith(sound):
                 final = sound
                 remaining = remaining[: -len(sound)] if sound else remaining
                 break
 
         # Find inner vowel
-        for sound in self.inners:
+        for sound in self.inners():
             if remaining.endswith(sound):
                 inner = sound
                 remaining = remaining[: -len(sound)]
                 break
 
         # Find initial consonant
-        for sound in self.initials:
+        for sound in self.initials():
             if remaining.endswith(sound):
                 initial = sound
                 remaining = remaining[: -len(sound)] if sound else remaining

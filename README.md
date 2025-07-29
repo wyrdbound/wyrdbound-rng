@@ -356,11 +356,12 @@ python -m pytest tests/ --cov=wyrdbound_rng --cov-report=html
 # Format code
 black src/ tests/ tools/
 
-# Sort imports
-isort src/ tests/ tools/
+# Lint and format with Ruff (includes import sorting)
+ruff check src/ tests/ tools/
+ruff format src/ tests/ tools/
 
-# Lint code
-flake8 src/ tests/ tools/
+# Or run both together
+ruff check --fix src/ tests/ tools/
 ```
 
 ## Contributing

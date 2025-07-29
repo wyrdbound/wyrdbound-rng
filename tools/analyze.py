@@ -7,8 +7,7 @@ import argparse
 import os
 import sys
 from collections import Counter
-from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict
 
 # Add the src directory to the path so we can import the package
 sys.path.insert(
@@ -24,7 +23,7 @@ def analyze_corpus(generator: Generator, verbose: bool = False) -> Dict:
     analysis = {
         "total_names": len(generator.names),
         "unique_syllables": len(
-            set(str(s) for name in generator.names for s in name.syllables)
+            {str(s) for name in generator.names for s in name.syllables}
         ),
         "avg_syllables_per_name": sum(len(name.syllables) for name in generator.names)
         / len(generator.names),

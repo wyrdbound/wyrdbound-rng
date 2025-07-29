@@ -2,8 +2,6 @@
 Japanese name segmenter using Japanese phonetic rules.
 """
 
-import re
-
 from ..syllable import Syllable
 from .syllable_segmenter_base import SyllableSegmenterBase
 
@@ -75,18 +73,6 @@ class JapaneseNameSegmenter(SyllableSegmenterBase):
         """Initialize the Japanese name segmenter."""
         # Don't call super().__init__ since we're using a custom segmentation approach
         pass
-
-    def segment(self, name):
-        """
-        Segment a Japanese name into proper syllables.
-
-        Args:
-            name (str): The name to segment
-
-        Returns:
-            list: List of Syllable objects
-        """
-        return self._segment_japanese_name(name.lower())
 
     @classmethod
     def segment(cls, name):
@@ -185,7 +171,6 @@ class JapaneseNameSegmenter(SyllableSegmenterBase):
                 and first_char in "kgstdnhbpmyrwzj"
                 and first_char != "n"
             ):
-
                 # Look ahead to see if there's a vowel after the double consonant
                 if len(remaining) > 2 and remaining[2] in "aiueo":
                     # Create a syllable that includes the geminated consonant

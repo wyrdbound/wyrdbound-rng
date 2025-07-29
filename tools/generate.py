@@ -7,8 +7,6 @@ import argparse
 import json
 import os
 import sys
-from pathlib import Path
-from typing import Any, Dict, List, Optional
 
 # Add the src directory to the path so we can import the package
 sys.path.insert(
@@ -82,7 +80,7 @@ def main():
 
         # Generate names
         results = []
-        for i in range(args.count):
+        for _i in range(args.count):
             name = generator.generate_name(
                 max_len=args.max_length,
                 algorithm=args.algorithm,

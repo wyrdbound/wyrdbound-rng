@@ -25,17 +25,19 @@ class Generator:
         Args:
             name_source (str): Name list identifier (e.g., "generic-fantasy") or path to YAML file
             segmenter: Segmenter class to use (defaults to FantasyNameSegmenter)
-        
+
         Raises:
             FileNotFoundError: If the name source cannot be resolved to a valid file
         """
         self.segmenter = segmenter or FantasyNameSegmenter()
-        
+
         # Resolve the name source to a file path
         self.filename = resolve_name_list(name_source)
         if not self.filename:
-            raise FileNotFoundError(f"Could not resolve name source '{name_source}' to a valid file")
-        
+            raise FileNotFoundError(
+                f"Could not resolve name source '{name_source}' to a valid file"
+            )
+
         self.name_source = name_source  # Store original identifier for reference
 
         # Load the names from file
@@ -361,7 +363,7 @@ class Generator:
             for syllable in name.syllables:
                 syllables.add(str(syllable))
 
-        syllables = sorted(list(syllables))
+        syllables = sorted(syllables)
 
         for i, syllable in enumerate(syllables, 1):
             print(f"{i:4}: {syllable}")

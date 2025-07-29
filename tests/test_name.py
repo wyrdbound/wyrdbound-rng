@@ -2,8 +2,6 @@
 Tests for the Name class.
 """
 
-import pytest
-
 from wyrdbound_rng import Name, Syllable
 
 

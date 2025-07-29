@@ -3,7 +3,6 @@ Name class representing a name with its syllable components.
 """
 
 from .segmenters.fantasy_name_segmenter import FantasyNameSegmenter
-from .syllable import Syllable
 
 
 class Name:
