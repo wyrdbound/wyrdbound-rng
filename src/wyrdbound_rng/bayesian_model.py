@@ -26,7 +26,8 @@ class BayesianModel:
         Initialize the Bayesian model.
 
         Args:
-            cache_adapter (Optional[CacheAdapter]): Cache adapter for storing probabilities
+            cache_adapter (Optional[CacheAdapter]): Cache adapter for storing
+                probabilities
         """
         self.cache_adapter = cache_adapter or JsonCacheAdapter()
 
@@ -130,7 +131,8 @@ class BayesianModel:
         # Try to load from cache first
         if self._load_from_cache(cache_key):
             print(
-                f"Loaded Bayesian probabilities from cache ({len(self.syllables)} syllables)"
+                f"Loaded Bayesian probabilities from cache "
+                f"({len(self.syllables)} syllables)"
             )
             return
 

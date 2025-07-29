@@ -110,7 +110,10 @@ def main():
                     if "probability" in result:
                         output += f" (probability: {result['probability']:.2e})"
                     if "exists_in_corpus" in result:
-                        output += f" {'*exists in corpus*' if result['exists_in_corpus'] else ''}"
+                        corpus_marker = (
+                            "*exists in corpus*" if result["exists_in_corpus"] else ""
+                        )
+                        output += f" {corpus_marker}"
                 print(output)
 
         if args.json:

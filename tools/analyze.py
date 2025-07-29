@@ -120,12 +120,14 @@ def main():
             if args.verbose and "name_length_stats" in analysis:
                 stats = analysis["name_length_stats"]
                 print(
-                    f"Name length: min={stats['min']}, max={stats['max']}, avg={stats['avg']:.2f}"
+                    f"Name length: min={stats['min']}, max={stats['max']}, "
+                    f"avg={stats['avg']:.2f}"
                 )
 
                 stats = analysis["syllable_count_stats"]
                 print(
-                    f"Syllable count: min={stats['min']}, max={stats['max']}, avg={stats['avg']:.2f}"
+                    f"Syllable count: min={stats['min']}, max={stats['max']}, "
+                    f"avg={stats['avg']:.2f}"
                 )
 
             print(f"\nTop {args.top_syllables} syllables by frequency:")

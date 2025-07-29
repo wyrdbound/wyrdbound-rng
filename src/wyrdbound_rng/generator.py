@@ -23,7 +23,8 @@ class Generator:
         Initialize the generator with a name source.
 
         Args:
-            name_source (str): Name list identifier (e.g., "generic-fantasy") or path to YAML file
+            name_source (str): Name list identifier (e.g., "generic-fantasy") or
+                path to YAML file
             segmenter: Segmenter class to use (defaults to FantasyNameSegmenter)
 
         Raises:
@@ -57,7 +58,8 @@ class Generator:
             n (int): Number of names to generate
             max_chars (int): Maximum character length for names
             algorithm (str): Algorithm to use ('very_simple', 'simple', 'bayesian')
-            min_probability_threshold (float): Minimum probability threshold for bayesian generation
+            min_probability_threshold (float): Minimum probability threshold for
+                bayesian generation
 
         Returns:
             list: List of GeneratedName objects
@@ -86,7 +88,8 @@ class Generator:
         Args:
             max_len (int): Maximum length for the name
             algorithm (str): Algorithm to use
-            min_probability_threshold (float): Minimum probability threshold for bayesian generation
+            min_probability_threshold (float): Minimum probability threshold for
+                bayesian generation
 
         Returns:
             GeneratedName: A generated name object
@@ -211,11 +214,13 @@ class Generator:
 
     def _generate_name_bayesian(self, max_len, min_probability_threshold=1.0e-8):
         """
-        Generate a name using the Bayesian algorithm (probabilistic syllable transitions).
+        Generate a name using the Bayesian algorithm (probabilistic syllable
+        transitions).
 
         Args:
             max_len (int): Maximum length for the name
-            min_probability_threshold (float): Minimum probability threshold for filtering
+            min_probability_threshold (float): Minimum probability threshold for
+                filtering
 
         Returns:
             GeneratedName: A generated name object
@@ -271,7 +276,8 @@ class Generator:
                             full_name, [], self.segmenter, normalized_probability
                         )
                     else:
-                        # Keep track of the best name we've seen, even if below threshold
+                        # Keep track of the best name we've seen, even if below
+                        # threshold
                         if normalized_probability > best_probability:
                             best_name = GeneratedName(
                                 full_name, [], self.segmenter, normalized_probability
@@ -320,7 +326,8 @@ class Generator:
             syllable (str): The syllable to analyze
 
         Returns:
-            Dict: Dictionary with probability information, or empty dict if not available
+            Dict: Dictionary with probability information, or empty dict if not
+                available
         """
         # Initialize Bayesian model if not already done
         if self.bayesian_model is None:

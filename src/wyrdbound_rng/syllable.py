@@ -1,11 +1,13 @@
 """
-Syllable class representing a phonetic syllable with initial, inner, and final components.
+Syllable class representing a phonetic syllable with initial, inner, and final
+components.
 """
 
 
 class Syllable:
     """
-    Represents a syllable with initial consonant(s), inner vowel(s), and final consonant(s).
+    Represents a syllable with initial consonant(s), inner vowel(s), and final
+    consonant(s).
     """
 
     def __init__(self, initial, inner, final=""):

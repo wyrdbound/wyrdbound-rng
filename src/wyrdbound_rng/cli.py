@@ -58,7 +58,8 @@ def main():
     parser.add_argument(
         "--show-analysis",
         action="store_true",
-        help="Show analysis info: corpus existence for all algorithms, plus probability for bayesian algorithm",
+        help="Show analysis info: corpus existence for all algorithms, "
+        "plus probability for bayesian algorithm",
     )
     parser.add_argument(
         "--min-probability",
@@ -75,7 +76,8 @@ def main():
         "--probabilities",
         type=str,
         metavar="SYLLABLE",
-        help="Show probability information for a specific syllable (requires bayesian algorithm)",
+        help="Show probability information for a specific syllable "
+        "(requires bayesian algorithm)",
     )
     parser.add_argument("--version", action="version", version="%(prog)s 0.0.1")
 
@@ -116,7 +118,8 @@ def main():
 
                 if not prob_info:
                     print(
-                        f"No probability information available for syllable '{syllable}'"
+                        f"No probability information available for syllable "
+                        f"'{syllable}'"
                     )
                     print("This could mean:")
                     print("- The syllable doesn't exist in the corpus")
@@ -124,7 +127,8 @@ def main():
                 else:
                     print(f"Syllable: {syllable}")
                     print(
-                        f"Start probability: {prob_info.get('start_probability', 0.0):.4f}"
+                        f"Start probability: "
+                        f"{prob_info.get('start_probability', 0.0):.4f}"
                     )
                     print(
                         f"End probability: {prob_info.get('end_probability', 0.0):.4f}"
