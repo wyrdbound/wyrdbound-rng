@@ -22,29 +22,62 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
+      - name: Create virtual environment
+        run: python -m venv .venv
+
+      - name: Activate virtual environment and install dependencies
         run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            source .venv/Scripts/activate
+          else
+            source .venv/bin/activate
+          fi
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
+        shell: bash
 
       - name: Lint with ruff
         run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            source .venv/Scripts/activate
+          else
+            source .venv/bin/activate
+          fi
           ruff check src/ tests/
+        shell: bash
 
-      - name: Check formatting with black
+      - name: Check formatting with ruff
         run: |
-          black --check src/ tests/
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            source .venv/Scripts/activate
+          else
+            source .venv/bin/activate
+          fi
+          ruff format --check src/ tests/
+        shell: bash
 
       - name: Run tests with pytest
         run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            source .venv/Scripts/activate
+          else
+            source .venv/bin/activate
+          fi
           pytest tests/ --cov=wyrdbound_rng --cov-report=xml --cov-report=term-missing
+        shell: bash
 
       - name: Test CLI installation and basic functionality
         run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            source .venv/Scripts/activate
+          else
+            source .venv/bin/activate
+          fi
           # Test that the CLI can be invoked
           wyrdbound-rng --version
           # Test basic functionality with a built-in list
           wyrdbound-rng -l generic-fantasy -n 3
+        shell: bash
 
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
@@ -67,21 +100,30 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install build tools
+      - name: Create virtual environment and install build tools
         run: |
+          python -m venv .venv
+          source .venv/bin/activate
           python -m pip install --upgrade pip
           pip install build twine
+        shell: bash
 
       - name: Build package
         run: |
+          source .venv/bin/activate
           python -m build
+        shell: bash
 
       - name: Check package
         run: |
+          source .venv/bin/activate
           twine check dist/*
+        shell: bash
 
       - name: Test package installation
         run: |
+          source .venv/bin/activate
           pip install dist/*.whl
           wyrdbound-rng --version
           wyrdbound-rng -l generic-fantasy -n 1
+        shell: bash

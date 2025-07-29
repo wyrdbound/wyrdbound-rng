@@ -39,7 +39,6 @@ dependencies = [
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
-    "black>=23.0.0",
     "ruff>=0.1.0",
 ]
 
@@ -65,10 +64,6 @@ include = ["wyrdbound_rng*"]
 [tool.setuptools.package-dir]
 "" = "src"
 
-[tool.black]
-line-length = 88
-target-version = ['py38']
-
 [tool.ruff]
 line-length = 88
 target-version = "py38"
@@ -92,9 +87,12 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E501"]
 
-[tool.isort]
-profile = "black"
-line_length = 88
+[tool.ruff.format]
+# Use ruff's formatter, which is compatible with black
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

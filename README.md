@@ -7,7 +7,7 @@ This library is designed for use in [wyrdbound](https://github.com/wyrdbound), a
 [![CI](https://github.com/wyrdbound/wyrdbound-rng/actions/workflows/ci.yml/badge.svg)](https://github.com/wyrdbound/wyrdbound-rng/actions/workflows/ci.yml)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 > 📣 This library is experimental and was built with much ❤️ and [vibe coding](https://en.wikipedia.org/wiki/Vibe_coding). Perfect for your tabletop RPG adventures, but maybe not for launching :rocket: or performing :brain: surgery! Enjoy!
 
@@ -335,6 +335,10 @@ custom_gen = Generator("./my-custom-names.yaml")
 git clone https://github.com/wyrdbound/wyrdbound-rng.git
 cd wyrdbound-rng
 
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
 # Install with development dependencies
 pip install -e ".[dev]"
 ```
@@ -342,7 +346,7 @@ pip install -e ".[dev]"
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run all tests (ensure .venv is activated)
 python -m pytest tests/
 
 # Run with coverage
@@ -355,10 +359,7 @@ python -m pytest tests/ --cov=wyrdbound_rng --cov-report=html
 ### Code Quality
 
 ```bash
-# Format code
-black src/ tests/ tools/
-
-# Lint and format with Ruff (includes import sorting)
+# Lint and format with Ruff (ensure .venv is activated)
 ruff check src/ tests/ tools/
 ruff format src/ tests/ tools/
 
