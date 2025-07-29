@@ -6,7 +6,7 @@ import hashlib
 import os
 import random
 from collections import Counter, defaultdict
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from .cache.cache_adapter import CacheAdapter
 from .cache.json_cache_adapter import JsonCacheAdapter
@@ -138,9 +138,9 @@ class BayesianModel:
 
         # Extract all syllables and build transition counts
         syllable_set = set()
-        bigram_counts = defaultdict(Counter)
-        start_counts = Counter()
-        end_counts = Counter()
+        bigram_counts: Dict[str, Counter] = defaultdict(Counter)
+        start_counts: Counter = Counter()
+        end_counts: Counter = Counter()
 
         for name in names:
             name_syllables = [str(syl) for syl in name.syllables]
@@ -321,7 +321,7 @@ class BayesianModel:
 
         return normalized_probability
 
-    def get_probability_info(self, syllable: str) -> Dict[str, float]:
+    def get_probability_info(self, syllable: str) -> Dict[str, Union[float, str]]:
         """
         Get probability information for a specific syllable.
 
@@ -329,12 +329,12 @@ class BayesianModel:
             syllable (str): The syllable to get info for
 
         Returns:
-            Dict[str, float]: Dictionary with probability information
+            Dict[str, Union[float, str]]: Dictionary with probability information
         """
         if not self._is_trained:
             return {}
 
-        info = {
+        info: Dict[str, Union[float, str]] = {
             "start_probability": self.start_probs.get(syllable, 0.0),
             "end_probability": self.end_probs.get(syllable, 0.0),
         }
