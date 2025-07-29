@@ -53,7 +53,7 @@ Documentation = "https://github.com/wyrdbound/wyrdbound-rng#readme"
 wyrdbound-rng = "wyrdbound_rng.cli:main"
 
 [tool.setuptools.package-data]
-wyrdbound_rng = ["py.typed"]
+wyrdbound_rng = ["py.typed", "data/*.yaml"]
 
 [tool.setuptools]
 include-package-data = true

@@ -1,0 +1,20 @@
+metadata:
+  description: Fantasy names with various cultural influences - Female names
+  segmenter: fantasy
+  sources:
+    - original corpus
+  version: "1.0"
+names:
+  - Abareth
+  - Abiona
+  - Acadine
+  - Accalia
+  - Adalia
+  - Adamina
+  - Aerin
+  - Aeris
+  - Aerwyn
+  - Aeshma
+  - Aewyn
+  - Agarwaen
+  - Alanna

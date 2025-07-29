@@ -1,0 +1,25 @@
+metadata:
+  description: Japanese names from the Sengoku period (1467-1615) - Women names
+  segmenter: japanese
+  sources:
+    - https://en.wikipedia.org/wiki/Onna-musha
+    - https://en.wikipedia.org/wiki/List_of_daimy%C5%8Ds_from_the_Sengoku_period
+  version: "1.0"
+names:
+  - Asahi
+  - Chacha
+  - Dota
+  - Gotoku
+  - Hosokawa
+  - Kasuga
+  - Kitsuno
+  - Kyougoku
+  - Nene
+  - Nou
+  - Oeyo
+  - Ohatsu
+  - Oichi
+  - Tatsuko
+  - Toku
+  - Tsukiyama
+  - Yodo

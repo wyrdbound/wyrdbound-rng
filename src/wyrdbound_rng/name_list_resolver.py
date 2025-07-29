@@ -35,17 +35,20 @@ def get_data_directory() -> Optional[str]:
     Returns:
         Path to data directory, or None if not found
     """
-    # First try relative to the package (development mode)
+    # First try package data directory (installed package)
     package_dir = Path(__file__).parent
+    package_data_dir = package_dir / "data"
+
+    if package_data_dir.exists():
+        return str(package_data_dir)
+
+    # Fallback to root data directory (development mode)
     root_dir = package_dir.parent.parent  # Go up two levels from src/wyrdbound_rng/
     data_dir = root_dir / "data"
 
     if data_dir.exists():
         return str(data_dir)
 
-    # For installed packages, try relative to the package location
-    # This would need to be adjusted based on how the package is distributed
-    # For now, just return None as fallback
     return None
 
 
