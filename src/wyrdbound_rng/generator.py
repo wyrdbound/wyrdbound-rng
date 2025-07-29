@@ -9,6 +9,7 @@ from typing import Dict
 from .bayesian_model import BayesianModel
 from .generated_name import GeneratedName
 from .name_file_loader import NameFileLoader
+from .name_list_resolver import resolve_name_list
 from .segmenters.fantasy_name_segmenter import FantasyNameSegmenter
 
 
@@ -17,20 +18,29 @@ class Generator:
     Main class for generating random names from a corpus of input names.
     """
 
-    def __init__(self, filename, segmenter=None):
+    def __init__(self, name_source, segmenter=None):
         """
-        Initialize the generator with a file of names.
+        Initialize the generator with a name source.
 
         Args:
-            filename (str): Path to YAML file containing names
+            name_source (str): Name list identifier (e.g., "generic-fantasy") or path to YAML file
             segmenter: Segmenter class to use (defaults to FantasyNameSegmenter)
+        
+        Raises:
+            FileNotFoundError: If the name source cannot be resolved to a valid file
         """
         self.segmenter = segmenter or FantasyNameSegmenter()
-        self.filename = filename
+        
+        # Resolve the name source to a file path
+        self.filename = resolve_name_list(name_source)
+        if not self.filename:
+            raise FileNotFoundError(f"Could not resolve name source '{name_source}' to a valid file")
+        
+        self.name_source = name_source  # Store original identifier for reference
 
         # Load the names from file
         loader = NameFileLoader(self.segmenter)
-        self.names = loader.load(filename)
+        self.names = loader.load(self.filename)
 
         # Initialize Bayesian model (lazy loading)
         self.bayesian_model = None

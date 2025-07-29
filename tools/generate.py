@@ -16,33 +16,23 @@ sys.path.insert(
 )
 
 from wyrdbound_rng import FantasyNameSegmenter, Generator, JapaneseNameSegmenter
-
-
-def find_data_file(filename: str) -> Optional[str]:
-    """Find a data file, checking current directory first, then root data directory."""
-    # Check current directory first
-    if os.path.exists(filename):
-        return filename
-
-    # Check if it's just a filename (no path separator)
-    if "/" not in filename and "\\" not in filename:
-        # Try to find it in the root data directory
-        script_dir = Path(__file__).parent
-        root_dir = script_dir.parent  # Go up one level from tools/
-        data_dir = root_dir / "data"
-        data_file = data_dir / filename
-        if data_file.exists():
-            return str(data_file)
-
-    return None
+from wyrdbound_rng.name_list_resolver import format_available_lists
 
 
 def main():
     """Main function for the advanced generation tool."""
     parser = argparse.ArgumentParser(
-        description="Advanced name generation with analysis", prog="generate"
+        description="Advanced name generation with analysis",
+        prog="generate",
+        epilog=format_available_lists(),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("names_file", help="Path to YAML file containing names")
+    parser.add_argument(
+        "-l",
+        "--list",
+        required=True,
+        help="Name list identifier (e.g., 'generic-fantasy') or path to YAML file",
+    )
     parser.add_argument(
         "-n",
         "--count",
@@ -80,13 +70,6 @@ def main():
 
     args = parser.parse_args()
 
-    # Find the data file
-    data_file = find_data_file(args.names_file)
-    if not data_file:
-        print(f"Error: File '{args.names_file}' not found")
-        print(f"Searched in current directory and data directory")
-        sys.exit(1)
-
     try:
         # Select segmenter
         if args.segmenter == "japanese":
@@ -95,7 +78,7 @@ def main():
             segmenter = FantasyNameSegmenter()
 
         # Create generator
-        generator = Generator(data_file, segmenter=segmenter)
+        generator = Generator(args.list, segmenter=segmenter)
 
         # Generate names
         results = []

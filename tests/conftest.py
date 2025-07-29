@@ -15,10 +15,10 @@ ROOT_DATA_DIR = ROOT_DIR / "data"
 @pytest.fixture
 def fantasy_names_yaml_path():
     """Path to the fantasy names YAML file."""
-    return str(ROOT_DATA_DIR / "generic-fantasy-names.yaml")
+    return str(ROOT_DATA_DIR / "generic-fantasy.yaml")
 
 
 @pytest.fixture
 def sengoku_names_yaml_path():
     """Path to the Sengoku names YAML file."""
-    return str(ROOT_DATA_DIR / "japanese-sengoku-names.yaml")
+    return str(ROOT_DATA_DIR / "japanese-sengoku.yaml")
