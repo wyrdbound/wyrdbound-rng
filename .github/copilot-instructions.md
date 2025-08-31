@@ -2,6 +2,20 @@
 
 **ALWAYS follow these instructions first and only fallback to additional search and context gathering if the information in these instructions is incomplete or found to be in error.**
 
+## AI Guidance and Development Principles
+
+### Core Development Guidelines
+
+- **Use the virtual environment**: Always activate the virtual environment in the project root (`source .venv/bin/activate && <your_command>`) before running any Python commands or tools.
+
+- **Prefer explicit errors over fallbacks**: When fallbacks would mask issues, choose explicit errors instead. We want to identify and fix issues to maintain a stable system rather than hiding problems with workarounds.
+
+- **No bandaid fixes**: Always respect architectural boundaries and make proper fixes rather than quick patches. Understand the root cause and address it appropriately within the existing architecture.
+
+- **Follow good software development practices**: Adhere to SOLID principles and other established software engineering best practices. Write clean, maintainable, and well-structured code.
+
+- **Simpler is better**: Choose the simplest solution that solves the problem effectively. Avoid over-engineering and unnecessary complexity.
+
 ## Working Effectively
 
 ### Development Environment Setup
@@ -17,29 +31,29 @@ pip install -e ".[dev]"
 ### Code Quality and Testing
 ```bash
 # Lint and format code (completes in <1 second each)
-ruff check src/ tests/ tools/
-ruff format src/ tests/ tools/
+source .venv/bin/activate && ruff check src/ tests/ tools/
+source .venv/bin/activate && ruff format src/ tests/ tools/
 
 # Auto-fix linting issues
-ruff check --fix src/ tests/ tools/
+source .venv/bin/activate && ruff check --fix src/ tests/ tools/
 
 # Run all tests (completes in ~8 seconds) - NEVER CANCEL
-python -m pytest tests/
+source .venv/bin/activate && python -m pytest tests/
 
 # Run tests with coverage (completes in ~8 seconds) - NEVER CANCEL  
-python -m pytest tests/ --cov=wyrdbound_rng
+source .venv/bin/activate && python -m pytest tests/ --cov=wyrdbound_rng
 
 # Run verbose tests to see individual test names (completes in ~1 second) - NEVER CANCEL
-python -m pytest tests/ -v
+source .venv/bin/activate && python -m pytest tests/ -v
 ```
 
 ### Package Building
 ```bash
 # Install build tools
-pip install build
+source .venv/bin/activate && pip install build
 
 # Build package (may fail due to network issues with PyPI)
-python -m build
+source .venv/bin/activate && python -m build
 # Note: Build may timeout due to network connectivity issues in isolated environments
 # If build fails with "Read timed out" errors, this is a known network limitation
 ```
@@ -49,41 +63,41 @@ python -m build
 ### CLI Tool Usage
 ```bash
 # Test CLI installation
-wyrdbound-rng --version
+source .venv/bin/activate && wyrdbound-rng --version
 
 # Basic name generation
-wyrdbound-rng -l generic-fantasy -n 5
+source .venv/bin/activate && wyrdbound-rng -l generic-fantasy -n 5
 
 # Advanced generation with analysis
-wyrdbound-rng -l generic-fantasy -n 3 -a bayesian --show-analysis
+source .venv/bin/activate && wyrdbound-rng -l generic-fantasy -n 3 -a bayesian --show-analysis
 
 # Japanese names with Japanese segmenter
-wyrdbound-rng -l japanese-sengoku -s japanese -n 3 -a bayesian --show-analysis
+source .venv/bin/activate && wyrdbound-rng -l japanese-sengoku -s japanese -n 3 -a bayesian --show-analysis
 
 # Show syllable breakdown
-wyrdbound-rng --syllables -l generic-fantasy
+source .venv/bin/activate && wyrdbound-rng --syllables -l generic-fantasy
 
 # Analyze specific syllable probabilities (requires bayesian algorithm)
-wyrdbound-rng --probabilities "el" -l generic-fantasy -a bayesian
+source .venv/bin/activate && wyrdbound-rng --probabilities "el" -l generic-fantasy -a bayesian
 ```
 
 ### Advanced Tools Usage
 ```bash
 # Advanced generation tool with JSON output and verbose details
-python tools/generate.py -l generic-fantasy -n 2 --json -v
+source .venv/bin/activate && python tools/generate.py -l generic-fantasy -n 2 --json -v
 
 # Corpus analysis tool
-python tools/analyze.py -l generic-fantasy
+source .venv/bin/activate && python tools/analyze.py -l generic-fantasy
 
 # Analysis with Japanese segmenter
-python tools/analyze.py -l japanese-sengoku -s japanese --top-syllables 30
+source .venv/bin/activate && python tools/analyze.py -l japanese-sengoku -s japanese --top-syllables 30
 
 # JSON output for programmatic use
-python tools/analyze.py -l generic-fantasy --json
+source .venv/bin/activate && python tools/analyze.py -l generic-fantasy --json
 
 # Use custom YAML files
-python tools/generate.py -l ./data/generic-fantasy.yaml -n 5
-python tools/analyze.py -l ./my-custom-names.yaml
+source .venv/bin/activate && python tools/generate.py -l ./data/generic-fantasy.yaml -n 5
+source .venv/bin/activate && python tools/analyze.py -l ./my-custom-names.yaml
 ```
 
 ## CRITICAL Timing and Cancellation Guidelines
@@ -107,25 +121,25 @@ python tools/analyze.py -l ./my-custom-names.yaml
 ### Core Functionality Validation
 ```bash
 # Test basic name generation works
-wyrdbound-rng -l generic-fantasy -n 3
+source .venv/bin/activate && wyrdbound-rng -l generic-fantasy -n 3
 
 # Test advanced algorithms work  
-wyrdbound-rng -l generic-fantasy -n 3 -a bayesian --show-analysis
+source .venv/bin/activate && wyrdbound-rng -l generic-fantasy -n 3 -a bayesian --show-analysis
 
 # Test Japanese segmentation works
-wyrdbound-rng -l japanese-sengoku -s japanese -n 3
+source .venv/bin/activate && wyrdbound-rng -l japanese-sengoku -s japanese -n 3
 
 # Test tools work with JSON output
-python tools/generate.py -l generic-fantasy -n 2 --json -v
-python tools/analyze.py -l generic-fantasy --json
+source .venv/bin/activate && python tools/generate.py -l generic-fantasy -n 2 --json -v
+source .venv/bin/activate && python tools/analyze.py -l generic-fantasy --json
 ```
 
 ### Code Quality Validation
 ```bash
 # ALWAYS run before committing changes
-ruff check --fix src/ tests/ tools/
-ruff format src/ tests/ tools/
-python -m pytest tests/
+source .venv/bin/activate && ruff check --fix src/ tests/ tools/
+source .venv/bin/activate && ruff format src/ tests/ tools/
+source .venv/bin/activate && python -m pytest tests/
 ```
 
 ## Available Built-in Name Lists
@@ -181,8 +195,8 @@ python -m pytest tests/
 ### File Not Found Errors
 ```bash
 # These will fail with clear error messages:
-wyrdbound-rng -l invalid-list
-python tools/generate.py -l nonexistent-file
+source .venv/bin/activate && wyrdbound-rng -l invalid-list
+source .venv/bin/activate && python tools/generate.py -l nonexistent-file
 # Error: Could not resolve name source 'X' to a valid file
 ```
 
