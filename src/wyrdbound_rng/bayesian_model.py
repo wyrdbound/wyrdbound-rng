@@ -136,7 +136,7 @@ class BayesianModel:
         if self._load_from_cache(cache_key):
             logger.debug(
                 "Loaded Bayesian probabilities from cache (%d syllables)",
-                len(self.syllables)
+                len(self.syllables),
             )
             return
 

@@ -1,6 +1,7 @@
 """
 Test bayesian model logging behavior.
 """
+
 import io
 import logging
 from contextlib import redirect_stdout
@@ -36,10 +37,10 @@ class TestBayesianLogging:
         # Create a custom handler that writes to our string buffer
         handler = logging.StreamHandler(log_capture)
         handler.setLevel(logging.DEBUG)
-        handler.setFormatter(logging.Formatter('%(levelname)s:%(name)s:%(message)s'))
+        handler.setFormatter(logging.Formatter("%(levelname)s:%(name)s:%(message)s"))
 
         # Get the library's logger and save its original configuration
-        library_logger = logging.getLogger('wyrdbound_rng')
+        library_logger = logging.getLogger("wyrdbound_rng")
         original_level = library_logger.level
         original_handlers = library_logger.handlers[:]
 
@@ -65,7 +66,9 @@ class TestBayesianLogging:
 
             # Should have either "Computing" or "Loaded" message depending on cache state
             has_computing_message = "Computing Bayesian probabilities" in captured_logs
-            has_loaded_message = "Loaded Bayesian probabilities from cache" in captured_logs
+            has_loaded_message = (
+                "Loaded Bayesian probabilities from cache" in captured_logs
+            )
             has_computed_message = "Computed probabilities for" in captured_logs
 
             # Should have at least one of these messages
@@ -94,16 +97,24 @@ class TestBayesianLogging:
         assert names[0] is not None
 
         # Verify debug messages were logged
-        debug_messages = [record for record in caplog.records if record.levelno == logging.DEBUG]
+        debug_messages = [
+            record for record in caplog.records if record.levelno == logging.DEBUG
+        ]
         assert len(debug_messages) > 0
 
         # Check for expected debug messages
         debug_texts = [record.message for record in debug_messages]
 
         # Should have either "Computing" or "Loaded" message depending on cache state
-        has_computing_message = any("Computing Bayesian probabilities" in msg for msg in debug_texts)
-        has_loaded_message = any("Loaded Bayesian probabilities from cache" in msg for msg in debug_texts)
-        has_computed_message = any("Computed probabilities for" in msg for msg in debug_texts)
+        has_computing_message = any(
+            "Computing Bayesian probabilities" in msg for msg in debug_texts
+        )
+        has_loaded_message = any(
+            "Loaded Bayesian probabilities from cache" in msg for msg in debug_texts
+        )
+        has_computed_message = any(
+            "Computed probabilities for" in msg for msg in debug_texts
+        )
 
         # Should have at least one of these messages
         assert has_computing_message or has_loaded_message
@@ -124,7 +135,8 @@ class TestBayesianLogging:
 
         # Verify no debug messages from bayesian_model were logged
         bayesian_debug_messages = [
-            record for record in caplog.records
+            record
+            for record in caplog.records
             if record.levelno == logging.DEBUG and "bayesian_model" in record.name
         ]
         assert len(bayesian_debug_messages) == 0
