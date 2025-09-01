@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Improved Bayesian Model Logging**: Converted print statements in Bayesian model to proper DEBUG level logging, allowing users to inject custom loggers and control output verbosity ([#5](https://github.com/wyrdbound/wyrdbound-rng/pull/5))
+  - Print statements replaced with `logger.debug()` calls
+  - Added comprehensive logging test suite (`test_bayesian_logging.py`)
+  - Users can now capture, filter, and control Bayesian model diagnostic output
+  - Maintains backward compatibility - no output by default, configurable via logging levels
+
 ## v0.0.1 (2025-07-28)
 
 ### Added
