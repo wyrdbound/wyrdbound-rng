@@ -3,6 +3,7 @@ Bayesian model for computing syllable transition probabilities.
 """
 
 import hashlib
+import logging
 import os
 import random
 from collections import Counter, defaultdict
@@ -10,6 +11,9 @@ from typing import Dict, List, Optional, Union
 
 from .cache.cache_adapter import CacheAdapter
 from .cache.json_cache_adapter import JsonCacheAdapter
+
+# Create logger for this module
+logger = logging.getLogger(__name__)
 
 
 class BayesianModel:
@@ -130,13 +134,13 @@ class BayesianModel:
 
         # Try to load from cache first
         if self._load_from_cache(cache_key):
-            print(
-                f"Loaded Bayesian probabilities from cache "
-                f"({len(self.syllables)} syllables)"
+            logger.debug(
+                "Loaded Bayesian probabilities from cache (%d syllables)",
+                len(self.syllables),
             )
             return
 
-        print("Computing Bayesian probabilities...")
+        logger.debug("Computing Bayesian probabilities...")
 
         # Extract all syllables and build transition counts
         syllable_set = set()
@@ -203,7 +207,7 @@ class BayesianModel:
         # Save to cache
         self._save_to_cache(cache_key)
 
-        print(f"Computed probabilities for {vocab_size} syllables")
+        logger.debug("Computed probabilities for %d syllables", vocab_size)
 
     def _weighted_random_choice(self, probabilities: Dict[str, float]) -> str:
         """
