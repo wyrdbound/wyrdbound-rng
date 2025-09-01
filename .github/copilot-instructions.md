@@ -140,6 +140,11 @@ source .venv/bin/activate && python tools/analyze.py -l generic-fantasy --json
 source .venv/bin/activate && ruff check --fix src/ tests/ tools/
 source .venv/bin/activate && ruff format src/ tests/ tools/
 source .venv/bin/activate && python -m pytest tests/
+
+# Verify CHANGELOG.md is updated (manual check)
+# - Ensure changes are documented in appropriate section
+# - Follow Keep a Changelog format
+# - Use proper section headers: Added/Changed/Fixed/Security
 ```
 
 ## Available Built-in Name Lists
@@ -205,13 +210,51 @@ source .venv/bin/activate && python tools/generate.py -l nonexistent-file
 - This is a known limitation in isolated network environments
 - Development and testing work fine without building packages
 
+## CHANGELOG Maintenance
+
+### Updating the CHANGELOG
+
+**ALWAYS update CHANGELOG.md when making changes** - this is critical for release notes and tracking project evolution.
+
+### When to Update CHANGELOG
+- **Every PR**: Add an entry describing what changed
+- **Bug fixes**: Document under "Fixed" section
+- **New features**: Document under "Added" section  
+- **Breaking changes**: Document under "Changed" section
+- **Dependencies**: Document under "Changed" section if user-facing
+
+### CHANGELOG Format
+Follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format:
+
+```markdown
+## [Unreleased]
+
+### Added
+- New feature description
+
+### Changed  
+- Modified behavior description
+
+### Fixed
+- Bug fix description
+```
+
+### CHANGELOG Workflow
+```bash
+# 1. Make your code changes
+# 2. Update CHANGELOG.md with your changes
+# 3. Run quality checks including CHANGELOG validation
+source .venv/bin/activate && python tools/analyze.py -l generic-fantasy --json > /dev/null || echo "CHANGELOG validation would go here"
+```
+
 ## Development Workflow
 
 1. **Setup**: Create venv and install dependencies (~12 seconds total)
 2. **Code**: Make changes to source files  
-3. **Validate**: Run ruff and tests (~9 seconds total)
-4. **Test manually**: Use CLI tools to verify functionality works
-5. **Commit**: Ensure all quality checks pass
+3. **Update CHANGELOG**: Document changes in CHANGELOG.md following Keep a Changelog format
+4. **Validate**: Run ruff and tests (~9 seconds total)
+5. **Test manually**: Use CLI tools to verify functionality works
+6. **Commit**: Ensure all quality checks pass and CHANGELOG is updated
 
 ## Test Coverage
 
