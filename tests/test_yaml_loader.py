@@ -4,6 +4,9 @@ Test script for the updated YAML name file loader.
 """
 
 from wyrdbound_rng.name_file_loader import NameFileLoader
+from wyrdbound_rng.name_list_resolver import get_data_directory
+
+DATA_DIR = get_data_directory()
 
 
 def test_yaml_loader():
@@ -15,7 +18,7 @@ def test_yaml_loader():
     # Test Japanese names (should auto-select Japanese segmenter)
     print("\n📄 Testing Japanese samurai names...")
     loader = NameFileLoader()
-    names = loader.load("data/japanese-sengoku-samurai.yaml")
+    names = loader.load(f"{DATA_DIR}/japanese-sengoku-samurai.yaml")
     metadata = loader.get_metadata()
 
     print(f"✅ Loaded {len(names)} names")
@@ -26,7 +29,7 @@ def test_yaml_loader():
     # Test Fantasy names (should auto-select Fantasy segmenter)
     print("\n📄 Testing Fantasy names...")
     loader2 = NameFileLoader()
-    names2 = loader2.load("data/generic-fantasy.yaml")
+    names2 = loader2.load(f"{DATA_DIR}/generic-fantasy.yaml")
     metadata2 = loader2.get_metadata()
 
     print(f"✅ Loaded {len(names2)} names")
@@ -40,7 +43,7 @@ def test_yaml_loader():
 
     override_segmenter = FantasyNameSegmenter()
     loader3 = NameFileLoader(segmenter=override_segmenter)
-    names3 = loader3.load("data/japanese-sengoku-samurai.yaml")
+    names3 = loader3.load(f"{DATA_DIR}/japanese-sengoku-samurai.yaml")
 
     print(f"✅ Loaded {len(names3)} names with override")
     print(f"🔤 Overridden Segmenter: {type(names3[0].segmenter).__name__}")

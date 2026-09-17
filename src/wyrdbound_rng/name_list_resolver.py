@@ -35,19 +35,17 @@ def get_data_directory() -> Optional[str]:
     Returns:
         Path to data directory, or None if not found
     """
-    # First try package data directory (installed package)
-    package_dir = Path(__file__).parent
-    package_data_dir = package_dir / "data"
+    # An explicit override lets a consumer point at its own corpora without
+    # passing a file path (e.g. Ascension supplying ancestry lists).
+    override = os.environ.get("WYRDBOUND_RNG_DATA_DIR")
+    if override and Path(override).is_dir():
+        return override
 
+    # The package data directory is the single source of truth for built-in
+    # name lists; it is always present, installed or editable.
+    package_data_dir = Path(__file__).parent / "data"
     if package_data_dir.exists():
         return str(package_data_dir)
-
-    # Fallback to root data directory (development mode)
-    root_dir = package_dir.parent.parent  # Go up two levels from src/wyrdbound_rng/
-    data_dir = root_dir / "data"
-
-    if data_dir.exists():
-        return str(data_dir)
 
     return None
 

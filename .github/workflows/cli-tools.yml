@@ -82,17 +82,14 @@ jobs:
           python tools/generate.py -l nonexistent-list -n 1 || echo "Expected failure handled correctly"
         shell: bash
 
-      - name: Test with custom YAML (if exists)
+      - name: Test with built-in lists
         run: |
           source .venv/bin/activate
-          # Test with data files (these should exist in the repository)
-          if [ -f "data/generic-fantasy.yaml" ]; then
-            wyrdbound-rng -l data/generic-fantasy.yaml -n 2
-            python tools/analyze.py -l data/generic-fantasy.yaml
-          fi
+          # Built-in identifiers resolve through the packaged data directory.
+          # Unguarded on purpose: a broken resolution must fail CI, not skip.
+          wyrdbound-rng -l generic-fantasy -n 2
+          python tools/analyze.py -l generic-fantasy
 
-          if [ -f "data/japanese-sengoku.yaml" ]; then
-            wyrdbound-rng -l data/japanese-sengoku.yaml -s japanese -n 2
-            python tools/analyze.py -l data/japanese-sengoku.yaml -s japanese
-          fi
+          wyrdbound-rng -l japanese-sengoku -s japanese -n 2
+          python tools/analyze.py -l japanese-sengoku -s japanese
         shell: bash
