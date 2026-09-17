@@ -341,7 +341,12 @@ class Generator:
 
     def _remove_repetitions(self, name):
         """
-        Remove repetitive letter patterns.
+        Collapse runs of repeated letters to a double.
+
+        A run of three or more identical letters becomes two ("Styrrr" ->
+        "Styrr"); a double is left alone. The previous implementation deleted
+        every "ll" and "nn" outright, which mangled roughly a third of all
+        generated names.
 
         Args:
             name (str): Name to clean up
@@ -349,10 +354,7 @@ class Generator:
         Returns:
             str: Cleaned name
         """
-        # Remove double l's and n's (similar to Ruby version)
-        result = re.sub(r"ll", "", name)
-        result = re.sub(r"nn", "", result)
-        return result
+        return re.sub(r"(.)\1{2,}", r"\1\1", name)
 
     def dump_names(self):
         """Print all loaded names for debugging."""
