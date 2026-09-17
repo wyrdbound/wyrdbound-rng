@@ -24,10 +24,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Maintains backward compatibility - no output by default, configurable via logging levels
 
 ### Fixed
+- **`_remove_repetitions` no longer deletes letters**: A run of repeated letters now collapses to a double instead of vanishing. The old implementation deleted every `ll` and `nn` outright, which mangled roughly a third of generated names for some corpora (`Sibella` -> `Sibea`, `Gestkell` -> `Gestke`). **This changes generated output for every existing corpus.**
 - **Simple algorithms no longer leak an oversized syllable**: In `_generate_name_simple` the `beginning` value kept the last attempted syllable whether or not it passed the length check, so when the loop exhausted, an over-length name was returned (`Geirlvalaudfr` at `max_len=8`). Candidate selection now resets per attempt and raises a clear error if no legal name can be assembled within the length range.
 - **Unpronounceable syllable junctions are rejected**: Generation now refuses names containing a run of four or more consecutive consonants (`Fjglaugr`, `Solthbaugr`, `Thjglamr`). The segmenter's onset-only syllables (`hr`, `sv`, `thj`) are legal before a vowel (`Hrafn`) and broken before a consonant; the accept condition is applied in all three algorithms. `y` counts as a vowel so Welsh names survive.
-- **`_remove_repetitions` no longer deletes letters**: A run of repeated letters now collapses to a double instead of vanishing. The old implementation deleted every `ll` and `nn` outright, which mangled roughly a third of generated names for some corpora (`Sibella` -> `Sibea`, `Gestkell` -> `Gestke`). **This changes generated output for every existing corpus.**
 - **Data directory resolution**: The root-`data/` fallback in `get_data_directory()` was unreachable, since the package directory is always present.
+
+### Documentation
+- Added the ten `ancestry-*` lists to the README table, along with `min_len`, the `rng` parameter and `WYRDBOUND_RNG_DATA_DIR`.
+- Corrected `TTRPG_CORPUS_GUIDE.md`: removed two tools that never existed, replaced the 85% novelty target with the measured coherence finding, and marked its size table as a rule of thumb rather than a measurement.
+- Corrected `CORPUS_REPORT.md` §3 with re-measured metrics and removed the stale "`--json` is broken" claim, which `58def61` had already fixed.
 
 ## v0.0.1 (2025-07-28)
 
