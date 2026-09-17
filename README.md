@@ -107,6 +107,16 @@ The library comes with several built-in name corpora. You can reference them usi
 - `generic-fantasy` - Traditional Western fantasy names (mixed)
 - `generic-fantasy-male` - Traditional Western fantasy male names
 - `generic-fantasy-female` - Traditional Western fantasy female names
+- `ancestry-dwarf-male` - Dwarf names, Old Norse / Old Icelandic register
+- `ancestry-dwarf-female` - Dwarf names, feminine Old Norse register
+- `ancestry-elf-male` - Elf names, Welsh / Brythonic register
+- `ancestry-elf-female` - Elf names, feminine Welsh register
+- `ancestry-halfling-male` - Halfling names, medieval English hypocoristics
+- `ancestry-halfling-female` - Halfling names, feminine pet-forms
+- `ancestry-human-male` - Human names, Frankish / Norman register
+- `ancestry-human-female` - Human names, feminine Frankish register
+- `ancestry-goblin-male` - Goblin names, original constructed phonology
+- `ancestry-goblin-female` - Goblin names, feminine constructed phonology
 - `japanese-sengoku` - Historical Japanese names from the Sengoku period (mixed)
 - `japanese-sengoku-clan` - Japanese Sengoku clan names
 - `japanese-sengoku-daimyo` - Japanese Sengoku daimyo names
@@ -124,6 +134,30 @@ You can also provide your own YAML files using relative or absolute paths:
 - `./my-names.yaml` - Relative path
 - `/absolute/path/to/names.yaml` - Absolute path
 
+### Data directory override
+
+Set `WYRDBOUND_RNG_DATA_DIR` to point the resolver at your own corpora directory
+instead of the packaged one:
+
+```bash
+WYRDBOUND_RNG_DATA_DIR=/path/to/corpora wyrdbound-rng --list my-list
+```
+
+### Reproducible generation
+
+Pass a `random.Random` to get identical names from the same seed:
+
+```python
+import random
+from wyrdbound_rng import Generator
+
+generator = Generator("ancestry-elf-female", rng=random.Random(42))
+names = [generator.generate_name(11, "bayesian").name for _ in range(5)]
+```
+
+Omitting `rng` uses the module-level `random`, so existing callers are
+unchanged.
+
 ## API Reference
 
 ### Main Classes
@@ -133,17 +167,21 @@ You can also provide your own YAML files using relative or absolute paths:
 The main entry point for name generation.
 
 ```python
-Generator(name_source, segmenter=None)
+Generator(name_source, segmenter=None, rng=None)
 ```
 
 - `name_source`: Built-in name list identifier (e.g., "generic-fantasy") or path to YAML file
 - `segmenter`: Syllable segmentation strategy (optional, auto-detected from YAML metadata)
+- `rng`: `random.Random` instance for reproducible generation (optional; defaults to the module-level `random`)
 
 **Methods:**
 
-- `generate_name(max_len, algorithm='simple', min_probability_threshold=1e-8)`: Generate a single name
-- `generate(n, max_chars=15, algorithm='simple', min_probability_threshold=1e-8)`: Generate multiple names
+- `generate_name(max_len, algorithm='simple', min_probability_threshold=1e-8, min_len=3)`: Generate a single name
+- `generate(n, max_chars=15, algorithm='simple', min_probability_threshold=1e-8, min_len=3)`: Generate multiple names
 - `name_exists_in_corpus(name)`: Check if a name exists in the source corpus
+
+`min_len` rejects names shorter than the given length (default `3`); it must not
+exceed `max_len`.
 
 #### `GeneratedName`
 
