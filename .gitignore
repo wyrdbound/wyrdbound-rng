@@ -179,3 +179,4 @@ cython_debug/
 *.html
 !docs/*.png
 !docs/*.svg
+CORPUS_REPORT.md
