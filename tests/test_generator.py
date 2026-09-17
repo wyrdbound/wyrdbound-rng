@@ -369,3 +369,63 @@ class TestSimpleAlgorithmStateLeak:
         for _ in range(100):
             name = generator.generate_name(8, "simple")
             assert len(name.name) <= 8
+
+
+class TestInjectableRng:
+    """Generation is reproducible from an injected ``random.Random``.
+
+    A consumer with its own derived streams (Ascension's character generation)
+    injects a ``random.Random``; omitting it preserves the module-level
+    behavior existing callers rely on.
+    """
+
+    def _sequence(self, source, seed, n=5, max_len=11, algorithm="bayesian"):
+        import random as _random
+
+        generator = Generator(source, rng=_random.Random(seed))
+        return [generator.generate_name(max_len, algorithm).name for _ in range(n)]
+
+    def test_same_seed_produces_identical_sequences(self):
+        assert self._sequence("ancestry-dwarf-male", 42) == self._sequence(
+            "ancestry-dwarf-male", 42
+        )
+
+    def test_different_seeds_produce_different_sequences(self):
+        assert self._sequence("ancestry-dwarf-male", 42) != self._sequence(
+            "ancestry-dwarf-male", 43
+        )
+
+    def test_rng_is_reproducible_across_all_algorithms(self):
+        for algorithm in ("very_simple", "simple", "bayesian"):
+            first = self._sequence("ancestry-dwarf-male", 7, algorithm=algorithm)
+            second = self._sequence("ancestry-dwarf-male", 7, algorithm=algorithm)
+            assert first == second
+
+    def test_omitting_rng_uses_module_level_random(self):
+        import random as _random
+
+        _random.seed(123)
+        first = [
+            Generator("ancestry-dwarf-male").generate_name(11, "simple").name
+            for _ in range(5)
+        ]
+        _random.seed(123)
+        second = [
+            Generator("ancestry-dwarf-male").generate_name(11, "simple").name
+            for _ in range(5)
+        ]
+        assert first == second
+
+    def test_no_module_scope_random_sampling_in_src(self):
+        """A source grep so a future regression is caught mechanically."""
+        import pathlib
+        import re
+
+        root = pathlib.Path(__file__).parent.parent / "src" / "wyrdbound_rng"
+        pattern = re.compile(r"\brandom\.(choice|random|randint|sample|choices)\b")
+        offenders = []
+        for path in root.rglob("*.py"):
+            for lineno, line in enumerate(path.read_text().splitlines(), 1):
+                if pattern.search(line):
+                    offenders.append(f"{path}:{lineno}: {line.strip()}")
+        assert offenders == [], offenders

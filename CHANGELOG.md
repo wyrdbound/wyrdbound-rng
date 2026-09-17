@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **`WYRDBOUND_RNG_DATA_DIR` environment override**: Point the resolver at a custom corpora directory without passing a file path.
+- **Injectable RNG**: `Generator(name_source, rng=random.Random(seed))` routes every sampling call through the injected instance, including inside `BayesianModel`. Identical seeds produce identical names across processes. Omitting it preserves the module-level `random` behavior existing callers rely on.
 - **`min_len` parameter**: `generate()` and `generate_name()` accept a minimum character length (default `3`, matching existing behavior). Names shorter than `min_len` are rejected and resampled; `min_len > max_len` raises `ValueError`.
 
 ### Changed
