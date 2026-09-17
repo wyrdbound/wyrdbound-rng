@@ -97,3 +97,42 @@ class TestGenerator:
         japanese_gen = Generator(sengoku_names_yaml_path, JapaneseNameSegmenter())
         japanese_names = japanese_gen.generate(3)
         assert len(japanese_names) == 3
+
+
+class TestRemoveRepetitions:
+    """Regression tests for Generator._remove_repetitions.
+
+    The old implementation deleted every ``ll`` and ``nn`` outright, mangling
+    roughly a third of generated names (Sibella -> Sibea, Gestkell -> Gestke).
+    A run of repeated letters must collapse to a double, not vanish.
+    """
+
+    REGRESSION_NAMES = [
+        "Gestkell",
+        "Ketill",
+        "Gunnar",
+        "Finnr",
+        "Hallgrim",
+        "Gwenllian",
+        "Sibella",
+    ]
+
+    def _clean(self, name):
+        generator = Generator.__new__(Generator)
+        return generator._remove_repetitions(name)
+
+    def test_names_with_doubled_letters_survive_intact(self):
+        for name in self.REGRESSION_NAMES:
+            assert self._clean(name) == name, f"{name} was mangled"
+
+    def test_triple_run_collapses_to_double(self):
+        assert self._clean("Styrrr") == "Styrr"
+        assert self._clean("Hallla") == "Halla"
+
+    def test_double_run_is_left_alone(self):
+        assert self._clean("Gunnar") == "Gunnar"
+
+    def test_remove_repetitions_is_idempotent(self):
+        for name in self.REGRESSION_NAMES + ["Styrrr", "Hallla"]:
+            once = self._clean(name)
+            assert self._clean(once) == once

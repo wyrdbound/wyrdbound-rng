@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "wyrdbound-rng"
-version = "0.0.2"
+version = "0.0.3"
 description = "A comprehensive random name generator library for tabletop RPGs"
 readme = "README.md"
 license = {text = "MIT"}
