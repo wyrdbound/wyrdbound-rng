@@ -241,6 +241,28 @@ class Generator:
         full_name = self._remove_repetitions(beginning + middle + ending).capitalize()
         return GeneratedName(full_name, source_names, self.segmenter)
 
+    def _trim_to_length(self, syllables, max_len):
+        """
+        Greedily trim a syllable sequence to the character cap.
+
+        Trims at a syllable boundary rather than mid-syllable, so the result is
+        still a sequence the corpus would produce.
+
+        Args:
+            syllables (list): Syllable sequence
+            max_len (int): Maximum character length for the name
+
+        Returns:
+            list: The longest prefix that fits, possibly empty
+        """
+        trimmed = []
+        for syllable in syllables:
+            candidate = self._remove_repetitions("".join(trimmed + [syllable]))
+            if len(candidate) > max_len:
+                break
+            trimmed.append(syllable)
+        return trimmed
+
     def _generate_name_bayesian(self, max_len, min_probability_threshold=1.0e-8):
         """
         Generate a name using the Bayesian algorithm (probabilistic syllable
@@ -268,9 +290,6 @@ class Generator:
         # (the ancestry corpora average ~2.45), not a hardcoded 3.
         max_syllables = self._syllable_budget(max_len)
 
-        # Minimum probability threshold to filter out very low-quality names
-        # min_probability_threshold = 1.0e-8
-
         attempts = 0
         best_name = None
         best_probability = 0.0
@@ -287,34 +306,46 @@ class Generator:
                     continue
 
                 # Join syllables to form name
-                full_name = "".join(syllables)
-                full_name = self._remove_repetitions(full_name).capitalize()
+                full_name = self._remove_repetitions("".join(syllables)).capitalize()
 
-                if len(full_name) <= max_len and self._is_pronounceable(full_name):
-                    # Calculate normalized probability for this name
-                    raw_probability = self.bayesian_model.calculate_name_probability(
-                        syllables
-                    )
-                    normalized_probability = (
-                        self.bayesian_model.calculate_normalized_name_probability(
-                            syllables
-                        )
+                if len(full_name) > max_len or not self._is_pronounceable(full_name):
+                    # Track the best candidate across every rejection reason,
+                    # trimming an over-length sequence at a syllable boundary
+                    # before giving up on it. The hardest cases no longer fall
+                    # through to the simple algorithm.
+                    trimmed = self._trim_to_length(syllables, max_len)
+                    if not trimmed:
+                        attempts += 1
+                        continue
+                    trimmed_name = self._remove_repetitions(
+                        "".join(trimmed)
+                    ).capitalize()
+                    if not trimmed_name or not self._is_pronounceable(trimmed_name):
+                        attempts += 1
+                        continue
+                    syllables = trimmed
+                    full_name = trimmed_name
+
+                raw_probability = self.bayesian_model.calculate_name_probability(
+                    syllables
+                )
+                normalized_probability = (
+                    self.bayesian_model.calculate_normalized_name_probability(syllables)
+                )
+
+                # Apply minimum probability threshold
+                if raw_probability >= min_probability_threshold:
+                    # Success! Return this high-quality Bayesian name
+                    return GeneratedName(
+                        full_name, [], self.segmenter, normalized_probability
                     )
 
-                    # Apply minimum probability threshold
-                    if raw_probability >= min_probability_threshold:
-                        # Success! Return this high-quality Bayesian name
-                        return GeneratedName(
-                            full_name, [], self.segmenter, normalized_probability
-                        )
-                    else:
-                        # Keep track of the best name we've seen, even if below
-                        # threshold
-                        if normalized_probability > best_probability:
-                            best_name = GeneratedName(
-                                full_name, [], self.segmenter, normalized_probability
-                            )
-                            best_probability = normalized_probability
+                # Keep track of the best name we've seen, even if below threshold
+                if best_name is None or normalized_probability > best_probability:
+                    best_name = GeneratedName(
+                        full_name, [], self.segmenter, normalized_probability
+                    )
+                    best_probability = normalized_probability
 
             except Exception:
                 # If syllable generation fails, just try again
@@ -322,21 +353,15 @@ class Generator:
 
             attempts += 1
 
-        # If we've tried many times and still can't meet the threshold,
-        # return the best Bayesian name we found, or fall back to simple algorithm
+        # Nothing met the threshold; return the highest-probability candidate
+        # seen rather than falling back to the simple algorithm.
         if best_name is not None:
             return best_name
 
-        # Last resort: fall back to simple algorithm but add probability calculation
-        fallback_name = self._generate_name_simple(max_len)
-        if self.bayesian_model and hasattr(fallback_name, "name"):
-            syllables = self.segmenter.segment(fallback_name.name)
-            syllable_strs = [str(s) for s in syllables]
-            probability = self.bayesian_model.calculate_normalized_name_probability(
-                syllable_strs
-            )
-            fallback_name.probability = probability
-        return fallback_name
+        raise RuntimeError(
+            f"Bayesian generation produced no candidate within {max_attempts} "
+            f"attempts at max_len={max_len}"
+        )
 
     def name_exists_in_corpus(self, name: str) -> bool:
         """

@@ -243,3 +243,64 @@ class TestLengthBudget:
             total += calls[0]
 
         assert total / 200 < 1.3
+
+
+class TestBayesianNeverFallsBack:
+    """The Bayesian path must not delegate to the simple algorithm.
+
+    A run where every candidate was rejected used to fall through to
+    ``_generate_name_simple``, the crudest generator available, so the
+    hardest cases got the worst answer.
+    """
+
+    LONG_SEQUENCE = ["hra", "ven", "dral", "grim", "ulf", "inn"]
+
+    def _patch_model(self, generator, monkeypatch, sequence):
+        generator.generate_name(11, "bayesian")  # train the model
+        monkeypatch.setattr(
+            generator.bayesian_model,
+            "generate_syllable_sequence",
+            lambda *args, **kwargs: list(sequence),
+        )
+
+    def test_simple_algorithm_is_never_reached(self, monkeypatch):
+        generator = Generator("ancestry-dwarf-male")
+
+        def explode(*args, **kwargs):
+            raise AssertionError("_generate_name_simple was reached")
+
+        monkeypatch.setattr(generator, "_generate_name_simple", explode)
+        self._patch_model(generator, monkeypatch, self.LONG_SEQUENCE)
+
+        name = generator.generate_name(4, "bayesian", min_probability_threshold=1.0)
+        assert name is not None
+        assert name.name
+
+    def test_over_length_candidate_is_trimmed_at_syllable_boundary(self, monkeypatch):
+        generator = Generator("ancestry-dwarf-male")
+
+        def explode(*args, **kwargs):
+            raise AssertionError("_generate_name_simple was reached")
+
+        monkeypatch.setattr(generator, "_generate_name_simple", explode)
+        self._patch_model(generator, monkeypatch, self.LONG_SEQUENCE)
+
+        name = generator.generate_name(4, "bayesian", min_probability_threshold=1.0)
+
+        # "Hra" is 3 characters; adding "ven" would make 6, so trimming at a
+        # syllable boundary yields "Hra", never "Hrav" or "Hr".
+        assert name.name == "Hra"
+        assert generator._is_pronounceable(name.name)
+
+    def test_returns_highest_probability_candidate_when_none_meet_threshold(
+        self, monkeypatch
+    ):
+        generator = Generator("ancestry-dwarf-male")
+        # A real high-probability bigram, so the candidate has nonzero
+        # probability but still cannot clear the impossible threshold.
+        self._patch_model(generator, monkeypatch, ["val", "dr"])
+
+        name = generator.generate_name(11, "bayesian", min_probability_threshold=1.0)
+        assert name.name == "Valdr"
+        assert name.probability is not None
+        assert name.probability > 0.0
