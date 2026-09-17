@@ -76,7 +76,12 @@ class Generator:
         return max(2, int(max_len / per_syllable))
 
     def generate(
-        self, n, max_chars=15, algorithm="very_simple", min_probability_threshold=1.0e-8
+        self,
+        n,
+        max_chars=15,
+        algorithm="very_simple",
+        min_probability_threshold=1.0e-8,
+        min_len=3,
     ):
         """
         Generate multiple random names.
@@ -87,6 +92,7 @@ class Generator:
             algorithm (str): Algorithm to use ('very_simple', 'simple', 'bayesian')
             min_probability_threshold (float): Minimum probability threshold for
                 bayesian generation
+            min_len (int): Minimum character length for names
 
         Returns:
             list: List of GeneratedName objects
@@ -97,9 +103,9 @@ class Generator:
             attempts = 0
             while attempts < 100:
                 name = self.generate_name(
-                    max_chars, algorithm, min_probability_threshold
+                    max_chars, algorithm, min_probability_threshold, min_len
                 )
-                if len(name.name) <= max_chars:
+                if min_len <= len(name.name) <= max_chars:
                     break
                 attempts += 1
             if name:
@@ -107,7 +113,11 @@ class Generator:
         return names
 
     def generate_name(
-        self, max_len, algorithm="very_simple", min_probability_threshold=1.0e-8
+        self,
+        max_len,
+        algorithm="very_simple",
+        min_probability_threshold=1.0e-8,
+        min_len=3,
     ):
         """
         Generate a single random name.
@@ -117,129 +127,122 @@ class Generator:
             algorithm (str): Algorithm to use
             min_probability_threshold (float): Minimum probability threshold for
                 bayesian generation
+            min_len (int): Minimum length for the name. Defaults to 3, matching
+                the shortest names the existing corpora produce.
 
         Returns:
             GeneratedName: A generated name object
         """
+        if min_len > max_len:
+            raise ValueError(f"min_len ({min_len}) must not exceed max_len ({max_len})")
+
         if algorithm == "very_simple":
-            return self._generate_name_very_simple(max_len)
+            return self._generate_name_very_simple(max_len, min_len)
         elif algorithm == "simple":
-            return self._generate_name_simple(max_len)
+            return self._generate_name_simple(max_len, min_len)
         elif algorithm == "bayesian":
-            return self._generate_name_bayesian(max_len, min_probability_threshold)
+            return self._generate_name_bayesian(
+                max_len, min_probability_threshold, min_len
+            )
         else:
             # Default fallback
-            return self._generate_name_simple(max_len)
+            return self._generate_name_simple(max_len, min_len)
 
-    def _generate_name_very_simple(self, max_len):
+    def _generate_name_very_simple(self, max_len, min_len=3):
         """
         Generate a name using the very simple algorithm (exactly two syllables).
 
         Args:
             max_len (int): Maximum length for the name
+            min_len (int): Minimum length for the name
 
         Returns:
             GeneratedName: A generated name object
-        """
-        source_names = []
-        beginning = ""
-        ending = ""
 
+        Raises:
+            ValueError: If no legal two-syllable name can be assembled
+        """
         # Validate maximum length
         if max_len < 2:
             max_len = 2
 
-        # Select a beginning syllable
-        attempts = 0
-        while attempts < 100:
-            name = random.choice(self.names)
-            if name.syllables:
-                beginning = str(name.syllables[0]).capitalize()
-                if len(beginning) < max_len:
-                    source_names.append(name.name)
-                    break
-            attempts += 1
+        for _ in range(100):
+            beginning_name = random.choice(self.names)
+            if not beginning_name.syllables:
+                continue
+            beginning = str(beginning_name.syllables[0]).capitalize()
 
-        # Select an ending syllable
-        attempts = 0
-        while attempts < 100:
-            name = random.choice(self.names)
-            if name.syllables:
-                ending = str(name.syllables[-1])
-                candidate = self._remove_repetitions(beginning + ending)
-                if len(candidate) <= max_len and self._is_pronounceable(candidate):
-                    source_names.append(name.name)
-                    break
-            attempts += 1
+            ending_name = random.choice(self.names)
+            if not ending_name.syllables:
+                continue
+            ending = str(ending_name.syllables[-1])
 
-        full_name = self._remove_repetitions(beginning + ending).capitalize()
-        return GeneratedName(full_name, source_names, self.segmenter)
+            candidate = self._remove_repetitions(beginning + ending).capitalize()
+            if min_len <= len(candidate) <= max_len and self._is_pronounceable(
+                candidate
+            ):
+                return GeneratedName(
+                    candidate,
+                    [beginning_name.name, ending_name.name],
+                    self.segmenter,
+                )
 
-    def _generate_name_simple(self, max_len):
+        raise ValueError(
+            f"Could not assemble a very_simple name within [{min_len}, {max_len}] "
+            "in 100 attempts"
+        )
+
+    def _generate_name_simple(self, max_len, min_len=3):
         """
         Generate a name using the simple algorithm (variable syllables).
 
         Args:
             max_len (int): Maximum length for the name
+            min_len (int): Minimum length for the name
 
         Returns:
             GeneratedName: A generated name object
-        """
-        source_names = []
-        beginning = ""
-        middle = ""
-        ending = ""
 
+        Raises:
+            ValueError: If no legal name can be assembled
+        """
         # Validate maximum length
         if max_len < 2:
             max_len = 2
 
-        # Select a beginning syllable
-        attempts = 0
-        while attempts < 100:
-            name = random.choice(self.names)
-            if name.syllables:
-                beginning = str(name.syllables[0]).capitalize()
-                if len(beginning) < max_len:
-                    source_names.append(name.name)
-                    break
-            attempts += 1
+        for _ in range(100):
+            beginning_name = random.choice(self.names)
+            if not beginning_name.syllables:
+                continue
+            beginning = str(beginning_name.syllables[0]).capitalize()
 
-        # Select an ending syllable
-        attempts = 0
-        while attempts < 100:
-            name = random.choice(self.names)
-            if name.syllables:
-                ending = str(name.syllables[-1])
-                if len(beginning + ending) <= max_len:
-                    source_names.append(name.name)
-                    break
-            attempts += 1
+            ending_name = random.choice(self.names)
+            if not ending_name.syllables:
+                continue
+            ending = str(ending_name.syllables[-1])
 
-        # Generate zero or more intermediate syllables
-        attempts = 0
-        while attempts < 100:
+            # Generate zero or more intermediate syllables
             middle = ""
             temp_source_names = []
-
-            # Determine number of intermediate syllables (0-3)
-            num_intermediate = random.randint(0, 3)
-
-            for _ in range(num_intermediate):
+            for _ in range(random.randint(0, 3)):
                 name = random.choice(self.names)
                 if name.syllables:
                     temp_source_names.append(name.name)
-                    syllable = random.choice(name.syllables)
-                    middle += str(syllable)
+                    middle += str(random.choice(name.syllables))
 
             candidate = self._remove_repetitions(beginning + middle + ending)
-            if len(candidate) <= max_len and self._is_pronounceable(candidate):
+            candidate = candidate.capitalize()
+            if min_len <= len(candidate) <= max_len and self._is_pronounceable(
+                candidate
+            ):
+                source_names = [beginning_name.name, ending_name.name]
                 source_names.extend(temp_source_names)
-                break
-            attempts += 1
+                return GeneratedName(candidate, source_names, self.segmenter)
 
-        full_name = self._remove_repetitions(beginning + middle + ending).capitalize()
-        return GeneratedName(full_name, source_names, self.segmenter)
+        raise ValueError(
+            f"Could not assemble a simple name within [{min_len}, {max_len}] "
+            "in 100 attempts"
+        )
 
     def _trim_to_length(self, syllables, max_len):
         """
@@ -263,7 +266,9 @@ class Generator:
             trimmed.append(syllable)
         return trimmed
 
-    def _generate_name_bayesian(self, max_len, min_probability_threshold=1.0e-8):
+    def _generate_name_bayesian(
+        self, max_len, min_probability_threshold=1.0e-8, min_len=3
+    ):
         """
         Generate a name using the Bayesian algorithm (probabilistic syllable
         transitions).
@@ -272,6 +277,7 @@ class Generator:
             max_len (int): Maximum length for the name
             min_probability_threshold (float): Minimum probability threshold for
                 filtering
+            min_len (int): Minimum length for the name
 
         Returns:
             GeneratedName: A generated name object
@@ -325,6 +331,10 @@ class Generator:
                         continue
                     syllables = trimmed
                     full_name = trimmed_name
+
+                if len(full_name) < min_len:
+                    attempts += 1
+                    continue
 
                 raw_probability = self.bayesian_model.calculate_name_probability(
                     syllables

@@ -2,6 +2,8 @@
 Tests for the Generator class.
 """
 
+import pytest
+
 from wyrdbound_rng import GeneratedName, Generator
 
 
@@ -304,3 +306,66 @@ class TestBayesianNeverFallsBack:
         assert name.name == "Valdr"
         assert name.probability is not None
         assert name.probability > 0.0
+
+
+class TestMinimumLength:
+    """`min_len` keeps short fragments like "Ays", "Iei", "Ona" out.
+
+    It defaults to 3, preserving the previous behavior for existing callers.
+    """
+
+    def test_min_len_is_respected(self):
+        generator = Generator("ancestry-dwarf-male")
+        for algorithm in ("very_simple", "simple", "bayesian"):
+            for _ in range(50):
+                name = generator.generate_name(11, algorithm, min_len=5)
+                assert len(name.name) >= 5, (algorithm, name.name)
+
+    def test_min_len_defaults_to_three(self):
+        generator = Generator("ancestry-dwarf-male")
+        for _ in range(50):
+            name = generator.generate_name(11, "very_simple")
+            assert len(name.name) >= 3
+
+    def test_min_len_greater_than_max_len_raises(self):
+        generator = Generator("ancestry-dwarf-male")
+        with pytest.raises(ValueError):
+            generator.generate_name(5, "simple", min_len=6)
+
+    def test_generate_threads_min_len(self):
+        generator = Generator("ancestry-dwarf-male")
+        names = generator.generate(10, max_chars=11, min_len=6)
+        assert len(names) == 10
+        for name in names:
+            assert len(name.name) >= 6
+
+
+class TestSimpleAlgorithmStateLeak:
+    """A failed length check must not leave an oversized syllable behind.
+
+    ``beginning`` kept the last attempted value whether or not it passed, so
+    when the loop exhausted the oversized syllable was used anyway.
+    """
+
+    def test_no_oversized_beginning_when_loop_exhausts(self, monkeypatch):
+        generator = Generator("ancestry-dwarf-male")
+
+        # Every "beginning" syllable is far too long for a 2-character cap, so
+        # the selection loop exhausts without a legal candidate.
+        class StubName:
+            name = "longsource"
+            syllables = ["Supercalifragilistic"]
+
+        monkeypatch.setattr(
+            "wyrdbound_rng.generator.random.choice",
+            lambda seq: StubName(),
+        )
+
+        with pytest.raises(ValueError):
+            generator._generate_name_simple(2, min_len=3)
+
+    def test_simple_algorithm_never_exceeds_cap_after_resampling(self):
+        generator = Generator("ancestry-dwarf-male")
+        for _ in range(100):
+            name = generator.generate_name(8, "simple")
+            assert len(name.name) <= 8
