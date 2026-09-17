@@ -74,13 +74,17 @@ import os
 import random
 import sys
 from collections import Counter
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Sequence
 
 sys.path.insert(
     0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src")
 )
 
-from wyrdbound_rng import FantasyNameSegmenter, Generator, JapaneseNameSegmenter  # noqa: E402
+from wyrdbound_rng import (  # noqa: E402
+    FantasyNameSegmenter,
+    Generator,
+    JapaneseNameSegmenter,
+)
 from wyrdbound_rng.name_list_resolver import (  # noqa: E402
     format_available_lists,
     get_available_name_lists,
@@ -127,7 +131,7 @@ BOUNDARY_END = "$"
 # ---------------------------------------------------------------------------
 
 
-def good_turing_coverage(freqs: Counter) -> Tuple[float, int, int, int]:
+def good_turing_coverage(freqs: Counter) -> tuple[float, int, int, int]:
     """Good-Turing sample coverage for a frequency table.
 
     Returns (coverage, f1, f2, total_tokens). Coverage is 1 - f1/T: the
@@ -157,7 +161,9 @@ def chao1(freqs: Counter) -> float:
     return s_obs + (f1 * (f1 - 1)) / 2.0
 
 
-def fit_power_law(xs: Sequence[float], ys: Sequence[float]) -> Optional[Tuple[float, float]]:
+def fit_power_law(
+    xs: Sequence[float], ys: Sequence[float]
+) -> tuple[float, float] | None:
     """Least-squares fit of y = a * x^(-b) in log-log space.
 
     Returns (a, b), or None when there are too few usable points. Points with a
@@ -184,7 +190,7 @@ def fit_power_law(xs: Sequence[float], ys: Sequence[float]) -> Optional[Tuple[fl
 # ---------------------------------------------------------------------------
 
 
-def syllable_lists(generator: Generator) -> List[List[str]]:
+def syllable_lists(generator: Generator) -> list[list[str]]:
     """The corpus as a list of syllable sequences, one per name."""
     return [[str(s) for s in name.syllables] for name in generator.names]
 
@@ -209,15 +215,15 @@ def bigram_counts(seqs: Sequence[Sequence[str]]) -> Counter:
     return counts
 
 
-def find_duplicates(generator: Generator) -> Dict[str, List[str]]:
+def find_duplicates(generator: Generator) -> dict[str, list[str]]:
     """Exact and case-insensitive duplicate names in the source corpus."""
-    seen: Dict[str, List[str]] = {}
+    seen: dict[str, list[str]] = {}
     for name in generator.names:
         seen.setdefault(name.name.lower(), []).append(name.name)
     return {k: v for k, v in seen.items() if len(v) > 1}
 
 
-def structure_report(generator: Generator, seqs: Sequence[Sequence[str]]) -> Dict:
+def structure_report(generator: Generator, seqs: Sequence[Sequence[str]]) -> dict:
     lengths = [len(n.name) for n in generator.names]
     syl_counts = [len(s) for s in seqs]
     uni = unigram_counts(seqs)
@@ -266,8 +272,8 @@ def structure_report(generator: Generator, seqs: Sequence[Sequence[str]]) -> Dic
 def saturation_curve(
     seqs: Sequence[Sequence[str]],
     trials: int = 12,
-    rng: Optional[random.Random] = None,
-) -> List[Dict]:
+    rng: random.Random | None = None,
+) -> list[dict]:
     """Rarefaction: what a corpus of size k drawn from this one would look like.
 
     For each sample size k, draws `trials` random subsets and averages the
@@ -280,7 +286,9 @@ def saturation_curve(
     if n == 0:
         return []
 
-    sizes = sorted({s for s in (25, 50, 75, 100, 150, 200, 300, 400, 500, 750, 1000) if s < n})
+    sizes = sorted(
+        {s for s in (25, 50, 75, 100, 150, 200, 300, 400, 500, 750, 1000) if s < n}
+    )
     sizes.append(n)
 
     curve = []
@@ -308,7 +316,7 @@ def saturation_curve(
     return curve
 
 
-def marginal_yield(curve: Sequence[Dict], per: int = 50) -> Optional[float]:
+def marginal_yield(curve: Sequence[dict], per: int = 50) -> float | None:
     """New unique syllables per `per` names added, measured at the top of the curve."""
     if len(curve) < 2:
         return None
@@ -320,11 +328,11 @@ def marginal_yield(curve: Sequence[Dict], per: int = 50) -> Optional[float]:
 
 
 def recommend_size(
-    curve: Sequence[Dict],
+    curve: Sequence[dict],
     current: int,
     key: str,
     target: float,
-) -> Dict:
+) -> dict:
     """Estimate the corpus size needed to reach `target` coverage.
 
     Fits (1 - coverage) = a * n^(-b) across the measured subsamples and solves
@@ -394,8 +402,8 @@ def generation_report(
     algorithm: str,
     max_length: int,
     min_probability: float,
-    seed: Optional[int] = None,
-) -> Dict:
+    seed: int | None = None,
+) -> dict:
     # Generator draws from the `random` module's global state and exposes no
     # seed of its own, so without this the novelty and uniqueness figures move
     # by ten points between identical runs and the report cannot be used to
@@ -445,7 +453,7 @@ def generation_report(
 # ---------------------------------------------------------------------------
 
 
-def build_verdict(structure: Dict, curve: Sequence[Dict], gen: Dict, args) -> Dict:
+def build_verdict(structure: dict, curve: Sequence[dict], gen: dict, args) -> dict:
     checks = []
 
     def check(name: str, ok: bool, detail: str) -> None:
@@ -512,7 +520,7 @@ def build_verdict(structure: Dict, curve: Sequence[Dict], gen: Dict, args) -> Di
 # ---------------------------------------------------------------------------
 
 
-def render(report: Dict, args) -> None:
+def render(report: dict, args) -> None:
     s = report["structure"]
     curve = report["saturation_curve"]
     v = report["verdict"]
@@ -521,37 +529,53 @@ def render(report: Dict, args) -> None:
     print()
     print("Structure")
     print(f"  Names                   {s['total_names']}")
-    print(f"  Unique syllables        {s['unique_syllables']} "
-          f"({s['syllable_tokens']} tokens)")
+    print(
+        f"  Unique syllables        {s['unique_syllables']} "
+        f"({s['syllable_tokens']} tokens)"
+    )
     print(f"  Unique syllable pairs   {s['unique_bigrams']}")
     print(f"  Distinct name openings  {s['distinct_initial_syllables']}")
     print(f"  Distinct name endings   {s['distinct_final_syllables']}")
-    print(f"  Name length             {s['name_length']['min']}-{s['name_length']['max']}"
-          f" (mean {s['name_length']['mean']:.1f})")
-    print(f"  Syllables per name      {s['syllables_per_name']['min']}-"
-          f"{s['syllables_per_name']['max']} (mean {s['syllables_per_name']['mean']:.2f})")
+    print(
+        f"  Name length             {s['name_length']['min']}-{s['name_length']['max']}"
+        f" (mean {s['name_length']['mean']:.1f})"
+    )
+    print(
+        f"  Syllables per name      {s['syllables_per_name']['min']}-"
+        f"{s['syllables_per_name']['max']} (mean {s['syllables_per_name']['mean']:.2f})"
+    )
     if s.get("duplicate_count"):
         print(f"  Duplicates              {s['duplicate_count']}  <-- remove these")
     print()
 
     print("Coverage  (probability the next name adds nothing new)")
-    print(f"  Unigram   {s['unigram_coverage']:.3f}   "
-          f"{s['unigram_hapax']} syllables seen only once")
-    print(f"  Bigram    {s['bigram_coverage']:.3f}   "
-          f"{s['bigram_hapax']} pairs seen only once")
-    print(f"  Richness  {s['unique_syllables']} observed / "
-          f"{s['unigram_chao1']:.0f} estimated (Chao1) - "
-          f"{max(0, s['unigram_chao1'] - s['unique_syllables']):.0f} syllables of this "
-          f"style still unseen")
+    print(
+        f"  Unigram   {s['unigram_coverage']:.3f}   "
+        f"{s['unigram_hapax']} syllables seen only once"
+    )
+    print(
+        f"  Bigram    {s['bigram_coverage']:.3f}   "
+        f"{s['bigram_hapax']} pairs seen only once"
+    )
+    print(
+        f"  Richness  {s['unique_syllables']} observed / "
+        f"{s['unigram_chao1']:.0f} estimated (Chao1) - "
+        f"{max(0, s['unigram_chao1'] - s['unique_syllables']):.0f} syllables of this "
+        f"style still unseen"
+    )
     print()
 
     if curve:
         print("Saturation")
-        print(f"  {'names':>7}  {'syllables':>10}  {'pairs':>7}  {'uni cov':>8}  {'bi cov':>7}")
+        print(
+            f"  {'names':>7}  {'syllables':>10}  {'pairs':>7}  {'uni cov':>8}  {'bi cov':>7}"
+        )
         for row in curve:
-            print(f"  {row['names']:>7}  {row['unique_syllables']:>10.0f}  "
-                  f"{row['unique_bigrams']:>7.0f}  {row['unigram_coverage']:>8.3f}  "
-                  f"{row['bigram_coverage']:>7.3f}")
+            print(
+                f"  {row['names']:>7}  {row['unique_syllables']:>10.0f}  "
+                f"{row['unique_bigrams']:>7.0f}  {row['unigram_coverage']:>8.3f}  "
+                f"{row['bigram_coverage']:>7.3f}"
+            )
         my = marginal_yield(curve)
         if my is not None:
             print(f"  Marginal yield: {my:.1f} new syllables per 50 names added")
@@ -561,31 +585,47 @@ def render(report: Dict, args) -> None:
     for label, key in (("unigram", "unigram"), ("bigram", "bigram")):
         rec = report["recommendation"][key]
         if rec["achieved"] >= rec["target"]:
-            print(f"  {label:<8} target {rec['target']:.2f} met at {s['total_names']} names")
+            print(
+                f"  {label:<8} target {rec['target']:.2f} met at {s['total_names']} names"
+            )
         elif rec.get("needed") is None:
             note = rec.get("note", "could not fit a reliable curve")
             print(f"  {label:<8} target {rec['target']:.2f} not met - {note}")
         else:
-            qualifier = " (extrapolated - re-measure as you grow)" if rec["extrapolated"] else ""
-            print(f"  {label:<8} target {rec['target']:.2f} needs ~{rec['needed']} names "
-                  f"(+{rec['additional']}){qualifier}")
+            qualifier = (
+                " (extrapolated - re-measure as you grow)"
+                if rec["extrapolated"]
+                else ""
+            )
+            print(
+                f"  {label:<8} target {rec['target']:.2f} needs ~{rec['needed']} names "
+                f"(+{rec['additional']}){qualifier}"
+            )
     print()
 
     g = report["generation"]
     if g.get("produced"):
-        print(f"Generation  ({g['algorithm']}, {g['produced']}/{g['requested']} produced)")
+        print(
+            f"Generation  ({g['algorithm']}, {g['produced']}/{g['requested']} produced)"
+        )
         print(f"  Novelty      {g['novelty_rate']:.1%}  (not already in corpus)")
         print(f"  Uniqueness   {g['uniqueness_rate']:.1%}  (distinct within the batch)")
-        print(f"  Length       {g['length']['min']}-{g['length']['max']} "
-              f"(mean {g['length']['mean']:.1f})")
+        print(
+            f"  Length       {g['length']['min']}-{g['length']['max']} "
+            f"(mean {g['length']['mean']:.1f})"
+        )
         if "probability" in g:
             p = g["probability"]
-            print(f"  Probability  geo-mean {p['geometric_mean']:.2e}  "
-                  f"median {p['median']:.2e}")
+            print(
+                f"  Probability  geo-mean {p['geometric_mean']:.2e}  "
+                f"median {p['median']:.2e}"
+            )
         print(f"  Samples      {', '.join(g['samples'][:12])}")
     else:
-        print(f"Generation  ({g['algorithm']}) produced nothing - "
-              f"threshold {args.min_probability:g} may be too strict for this corpus")
+        print(
+            f"Generation  ({g['algorithm']}) produced nothing - "
+            f"threshold {args.min_probability:g} may be too strict for this corpus"
+        )
     print()
 
     print(f"Verdict: {v['status']}  ({v['passed']}/{v['total']} checks)")
@@ -605,7 +645,7 @@ def render(report: Dict, args) -> None:
             print(f"  {syl:<12} {n}")
 
 
-def render_summary_row(report: Dict) -> str:
+def render_summary_row(report: dict) -> str:
     s = report["structure"]
     v = report["verdict"]
     g = report["generation"]
@@ -622,9 +662,11 @@ def render_summary_row(report: Dict) -> str:
 # ---------------------------------------------------------------------------
 
 
-def analyze(source: str, args) -> Dict:
+def analyze(source: str, args) -> dict:
     segmenter = (
-        JapaneseNameSegmenter() if args.segmenter == "japanese" else FantasyNameSegmenter()
+        JapaneseNameSegmenter()
+        if args.segmenter == "japanese"
+        else FantasyNameSegmenter()
     )
     generator = Generator(source, segmenter=segmenter)
     seqs = syllable_lists(generator)
@@ -650,11 +692,15 @@ def analyze(source: str, args) -> Dict:
         "saturation_curve": curve,
         "recommendation": {
             "unigram": recommend_size(
-                curve, structure["total_names"], "unigram_coverage",
+                curve,
+                structure["total_names"],
+                "unigram_coverage",
                 args.target_unigram_coverage,
             ),
             "bigram": recommend_size(
-                curve, structure["total_names"], "bigram_coverage",
+                curve,
+                structure["total_names"],
+                "bigram_coverage",
                 args.target_bigram_coverage,
             ),
         },
@@ -676,66 +722,96 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "-l", "--list",
+        "-l",
+        "--list",
         dest="source",
         help="Name list identifier (e.g. 'generic-fantasy') or path to a YAML file",
     )
     parser.add_argument(
-        "--all", action="store_true",
+        "--all",
+        action="store_true",
         help="Test every built-in name list and print a ranked summary table",
     )
     parser.add_argument(
-        "-s", "--segmenter", choices=["fantasy", "japanese"], default="fantasy",
+        "-s",
+        "--segmenter",
+        choices=["fantasy", "japanese"],
+        default="fantasy",
         help="Segmentation method (default: fantasy)",
     )
     parser.add_argument(
-        "-a", "--algorithm", choices=["simple", "bayesian", "very_simple"],
+        "-a",
+        "--algorithm",
+        choices=["simple", "bayesian", "very_simple"],
         default="bayesian",
         help="Generation algorithm to exercise (default: bayesian)",
     )
     parser.add_argument(
-        "-n", "--count", type=int, default=200,
+        "-n",
+        "--count",
+        type=int,
+        default=200,
         help="Names to generate for the quality sample (default: 200)",
     )
     parser.add_argument(
-        "--max-length", type=int, default=15,
+        "--max-length",
+        type=int,
+        default=15,
         help="Maximum generated name length (default: 15)",
     )
     parser.add_argument(
-        "--min-probability", type=float, default=1e-8,
+        "--min-probability",
+        type=float,
+        default=1e-8,
         help="Bayesian minimum probability threshold (default: 1e-8)",
     )
     parser.add_argument(
-        "--target-unigram-coverage", type=float, default=DEFAULT_TARGET_UNIGRAM_COVERAGE,
+        "--target-unigram-coverage",
+        type=float,
+        default=DEFAULT_TARGET_UNIGRAM_COVERAGE,
         help=f"Target syllable coverage (default: {DEFAULT_TARGET_UNIGRAM_COVERAGE})",
     )
     parser.add_argument(
-        "--target-bigram-coverage", type=float, default=DEFAULT_TARGET_BIGRAM_COVERAGE,
+        "--target-bigram-coverage",
+        type=float,
+        default=DEFAULT_TARGET_BIGRAM_COVERAGE,
         help=f"Target syllable-pair coverage (default: {DEFAULT_TARGET_BIGRAM_COVERAGE})",
     )
     parser.add_argument(
-        "--min-novelty", type=float, default=DEFAULT_MIN_NOVELTY,
+        "--min-novelty",
+        type=float,
+        default=DEFAULT_MIN_NOVELTY,
         help=f"Minimum acceptable novelty rate (default: {DEFAULT_MIN_NOVELTY})",
     )
     parser.add_argument(
-        "--min-uniqueness", type=float, default=DEFAULT_MIN_UNIQUENESS,
+        "--min-uniqueness",
+        type=float,
+        default=DEFAULT_MIN_UNIQUENESS,
         help=f"Minimum acceptable uniqueness rate (default: {DEFAULT_MIN_UNIQUENESS})",
     )
     parser.add_argument(
-        "--saturation-yield", type=float, default=DEFAULT_SATURATION_YIELD,
+        "--saturation-yield",
+        type=float,
+        default=DEFAULT_SATURATION_YIELD,
         help="New syllables per 50 names at which a corpus counts as saturated "
-             f"(default: {DEFAULT_SATURATION_YIELD})",
+        f"(default: {DEFAULT_SATURATION_YIELD})",
     )
     parser.add_argument(
-        "--trials", type=int, default=12,
+        "--trials",
+        type=int,
+        default=12,
         help="Subsamples averaged per point on the saturation curve (default: 12)",
     )
     parser.add_argument(
-        "--seed", type=int, default=0xC0FFEE,
+        "--seed",
+        type=int,
+        default=0xC0FFEE,
         help="Seed for subsampling, so reports are reproducible",
     )
     parser.add_argument(
-        "--top-syllables", type=int, default=20,
+        "--top-syllables",
+        type=int,
+        default=20,
         help="Syllables to list in verbose mode (default: 20)",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Show detail")
@@ -762,8 +838,10 @@ def main() -> int:
             print(json.dumps(reports, indent=2, default=str))
             return 0
 
-        print(f"{'corpus':<34} {'names':>6} {'syls':>7} {'uni cov':>8} {'bi cov':>7} "
-              f"{'novelty':>8} {'verdict':>11}")
+        print(
+            f"{'corpus':<34} {'names':>6} {'syls':>7} {'uni cov':>8} {'bi cov':>7} "
+            f"{'novelty':>8} {'verdict':>11}"
+        )
         print("-" * 86)
         for r in sorted(reports, key=lambda r: -r["structure"]["bigram_coverage"]):
             print(render_summary_row(r))
