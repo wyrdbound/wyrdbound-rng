@@ -93,3 +93,41 @@ jobs:
           wyrdbound-rng -l japanese-sengoku -s japanese -n 2
           python tools/analyze.py -l japanese-sengoku -s japanese
         shell: bash
+
+  corpus:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Create virtual environment
+        run: python -m venv .venv
+
+      - name: Install dependencies
+        run: |
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+        shell: bash
+
+      - name: Measure ancestry corpus quality
+        run: |
+          source .venv/bin/activate
+          # The tool exits 2 for a NEEDS WORK verdict, which is a legitimate
+          # measurement rather than a failure, so the exit code is captured
+          # rather than propagated and only the JSON contract is enforced.
+          # Parseable JSON on stdout is the gate; a broken resolver or a crash
+          # fails the parse.
+          python tools/corpus_test.py --list ancestry-dwarf-male --json > corpus-report.json
+          status=$?
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+            echo "corpus_test.py exited $status" >&2
+            exit 1
+          fi
+          python -c "import json; r=json.load(open('corpus-report.json')); assert all(k in r for k in ('structure','verdict','generation')); assert r['structure']['unigram_coverage'] > 0; print('corpus report OK:', r['verdict']['status'])"
+        shell: bash

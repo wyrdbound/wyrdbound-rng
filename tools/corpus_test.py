@@ -402,16 +402,7 @@ def generation_report(
     algorithm: str,
     max_length: int,
     min_probability: float,
-    seed: int | None = None,
 ) -> dict:
-    # Generator draws from the `random` module's global state and exposes no
-    # seed of its own, so without this the novelty and uniqueness figures move
-    # by ten points between identical runs and the report cannot be used to
-    # judge whether a corpus edit helped. Seeding the global state is the only
-    # lever available from outside the library.
-    if seed is not None:
-        random.seed(seed)
-
     generated = generator.generate(
         count, max_length, algorithm, min_probability_threshold=min_probability
     )
@@ -668,7 +659,7 @@ def analyze(source: str, args) -> dict:
         if args.segmenter == "japanese"
         else FantasyNameSegmenter()
     )
-    generator = Generator(source, segmenter=segmenter)
+    generator = Generator(source, segmenter=segmenter, rng=random.Random(args.seed))
     seqs = syllable_lists(generator)
 
     structure = structure_report(generator, seqs)
@@ -682,7 +673,6 @@ def analyze(source: str, args) -> dict:
         args.algorithm,
         args.max_length,
         args.min_probability,
-        seed=args.seed,
     )
 
     report = {
