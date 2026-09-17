@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Maintains backward compatibility - no output by default, configurable via logging levels
 
 ### Fixed
+- **Unpronounceable syllable junctions are rejected**: Generation now refuses names containing a run of four or more consecutive consonants (`Fjglaugr`, `Solthbaugr`, `Thjglamr`). The segmenter's onset-only syllables (`hr`, `sv`, `thj`) are legal before a vowel (`Hrafn`) and broken before a consonant; the accept condition is applied in all three algorithms. `y` counts as a vowel so Welsh names survive.
 - **`_remove_repetitions` no longer deletes letters**: A run of repeated letters now collapses to a double instead of vanishing. The old implementation deleted every `ll` and `nn` outright, which mangled roughly a third of generated names for some corpora (`Sibella` -> `Sibea`, `Gestkell` -> `Gestke`). **This changes generated output for every existing corpus.**
 - **Data directory resolution**: The root-`data/` fallback in `get_data_directory()` was unreachable, since the package directory is always present.
 

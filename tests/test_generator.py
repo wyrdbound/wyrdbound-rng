@@ -136,3 +136,48 @@ class TestRemoveRepetitions:
         for name in self.REGRESSION_NAMES + ["Styrrr", "Hallla"]:
             once = self._clean(name)
             assert self._clean(once) == once
+
+
+class TestPronounceable:
+    """Syllable junctions must not create runs of four consonants.
+
+    The segmenter emits onset-only syllables (``hr``, ``sv``, ``thj``), which
+    are legal before a vowel (``hr`` + ``afn`` = Hrafn) and broken before a
+    consonant (``hr`` + ``gils`` = Hrgils). The rule is about the junction,
+    not the syllable.
+    """
+
+    def _is_pronounceable(self, name):
+        generator = Generator.__new__(Generator)
+        return generator._is_pronounceable(name)
+
+    def test_accepts_a_three_consonant_run(self):
+        assert self._is_pronounceable("Strong") is True
+
+    def test_rejects_a_four_consonant_run(self):
+        assert self._is_pronounceable("Fjglaugr") is False
+
+    def test_accepts_vowelless_syllable_before_a_vowel(self):
+        assert self._is_pronounceable("Hrafn") is True
+
+    def test_a_three_consonant_onset_is_legal(self):
+        # The rule is a four-consonant run, so a three-consonant onset such as
+        # "hrg" in Hrgils or "svg" in Svgest is accepted. The feature document
+        # lists these as rejected, which contradicts its own explicit
+        # "rejects a run of four or more consecutive consonants" statement.
+        assert self._is_pronounceable("Hrgils") is True
+        assert self._is_pronounceable("Svgest") is True
+
+    def test_rejects_other_bad_junctions(self):
+        assert self._is_pronounceable("Solthbaugr") is False
+        assert self._is_pronounceable("Thjglamr") is False
+
+    def test_y_counts_as_a_vowel(self):
+        for name in ("Gwyn", "Myrddin", "Bryn"):
+            assert self._is_pronounceable(name) is True
+
+    def test_no_four_consonant_run_in_dwarf_male(self):
+        generator = Generator("ancestry-dwarf-male")
+        for _ in range(200):
+            name = generator.generate_name(11, "bayesian")
+            assert self._is_pronounceable(name.name) is True, name.name

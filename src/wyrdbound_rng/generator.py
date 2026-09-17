@@ -139,7 +139,8 @@ class Generator:
             name = random.choice(self.names)
             if name.syllables:
                 ending = str(name.syllables[-1])
-                if len(beginning + ending) <= max_len:
+                candidate = self._remove_repetitions(beginning + ending)
+                if len(candidate) <= max_len and self._is_pronounceable(candidate):
                     source_names.append(name.name)
                     break
             attempts += 1
@@ -204,7 +205,8 @@ class Generator:
                     syllable = random.choice(name.syllables)
                     middle += str(syllable)
 
-            if len(self._remove_repetitions(beginning + middle + ending)) <= max_len:
+            candidate = self._remove_repetitions(beginning + middle + ending)
+            if len(candidate) <= max_len and self._is_pronounceable(candidate):
                 source_names.extend(temp_source_names)
                 break
             attempts += 1
@@ -258,7 +260,7 @@ class Generator:
                 full_name = "".join(syllables)
                 full_name = self._remove_repetitions(full_name).capitalize()
 
-                if len(full_name) <= max_len:
+                if len(full_name) <= max_len and self._is_pronounceable(full_name):
                     # Calculate normalized probability for this name
                     raw_probability = self.bayesian_model.calculate_name_probability(
                         syllables
@@ -338,6 +340,23 @@ class Generator:
             self.bayesian_model.train(self.names, self.filename, segmenter_type)
 
         return self.bayesian_model.get_probability_info(syllable)
+
+    def _is_pronounceable(self, name):
+        """
+        Reject names containing a run of four or more consecutive consonants.
+
+        The segmenter emits onset-only syllables (``hr``, ``sv``, ``thj``) that
+        are legal before a vowel (``hr`` + ``afn`` = Hrafn) and broken before a
+        consonant (``hr`` + ``gils`` = Hrgils). ``y`` counts as a vowel so the
+        Welsh names in ``ancestry-elf-*`` survive (Gwyn, Myrddin, Bryn).
+
+        Args:
+            name (str): Name to check
+
+        Returns:
+            bool: True if the name has no four-consonant run
+        """
+        return re.search(r"[^aeiouy]{4,}", name.lower()) is None
 
     def _remove_repetitions(self, name):
         """
