@@ -180,7 +180,6 @@ source .venv/bin/activate && python -m pytest tests/
 ├── tools/                       # Advanced CLI tools
 │   ├── generate.py              # Advanced generation with JSON
 │   └── analyze.py               # Corpus analysis tool
-├── data/                        # External data files
 └── pyproject.toml               # Project configuration
 ```
 

@@ -7,12 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`WYRDBOUND_RNG_DATA_DIR` environment override**: Point the resolver at a custom corpora directory without passing a file path.
+
 ### Changed
+- **One source of truth for built-in name data**: Removed the vestigial root `data/` directory. `src/wyrdbound_rng/data/` is now the only data directory; it is what ships in the wheel. The resolver's dead root-`data/` fallback is replaced by the environment override.
 - **Improved Bayesian Model Logging**: Converted print statements in Bayesian model to proper DEBUG level logging, allowing users to inject custom loggers and control output verbosity ([#5](https://github.com/wyrdbound/wyrdbound-rng/pull/5))
   - Print statements replaced with `logger.debug()` calls
   - Added comprehensive logging test suite (`test_bayesian_logging.py`)
   - Users can now capture, filter, and control Bayesian model diagnostic output
   - Maintains backward compatibility - no output by default, configurable via logging levels
+
+### Fixed
+- **Data directory resolution**: The root-`data/` fallback in `get_data_directory()` was unreachable, since the package directory is always present.
 
 ## v0.0.1 (2025-07-28)
 
