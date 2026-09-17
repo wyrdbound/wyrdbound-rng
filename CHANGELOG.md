@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **`WYRDBOUND_RNG_DATA_DIR` environment override**: Point the resolver at a custom corpora directory without passing a file path.
+- **`min_len` parameter**: `generate()` and `generate_name()` accept a minimum character length (default `3`, matching existing behavior). Names shorter than `min_len` are rejected and resampled; `min_len > max_len` raises `ValueError`.
 
 ### Changed
 - **The Bayesian path never falls back to the simple algorithm**: The best candidate is now tracked across every rejection reason, not only when a candidate came in under length but below threshold. An over-length candidate is trimmed at a syllable boundary and re-checked for pronounceability instead of being discarded. When nothing meets the threshold the highest-probability candidate seen is returned; a run with no candidate at all raises rather than silently using the crudest generator.
@@ -21,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Maintains backward compatibility - no output by default, configurable via logging levels
 
 ### Fixed
+- **Simple algorithms no longer leak an oversized syllable**: In `_generate_name_simple` the `beginning` value kept the last attempted syllable whether or not it passed the length check, so when the loop exhausted, an over-length name was returned (`Geirlvalaudfr` at `max_len=8`). Candidate selection now resets per attempt and raises a clear error if no legal name can be assembled within the length range.
 - **Unpronounceable syllable junctions are rejected**: Generation now refuses names containing a run of four or more consecutive consonants (`Fjglaugr`, `Solthbaugr`, `Thjglamr`). The segmenter's onset-only syllables (`hr`, `sv`, `thj`) are legal before a vowel (`Hrafn`) and broken before a consonant; the accept condition is applied in all three algorithms. `y` counts as a vowel so Welsh names survive.
 - **`_remove_repetitions` no longer deletes letters**: A run of repeated letters now collapses to a double instead of vanishing. The old implementation deleted every `ll` and `nn` outright, which mangled roughly a third of generated names for some corpora (`Sibella` -> `Sibea`, `Gestkell` -> `Gestke`). **This changes generated output for every existing corpus.**
 - **Data directory resolution**: The root-`data/` fallback in `get_data_directory()` was unreachable, since the package directory is always present.
