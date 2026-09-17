@@ -18,7 +18,7 @@ class Generator:
     Main class for generating random names from a corpus of input names.
     """
 
-    def __init__(self, name_source, segmenter=None):
+    def __init__(self, name_source, segmenter=None, rng=None):
         """
         Initialize the generator with a name source.
 
@@ -26,11 +26,15 @@ class Generator:
             name_source (str): Name list identifier (e.g., "generic-fantasy") or
                 path to YAML file
             segmenter: Segmenter class to use (defaults to FantasyNameSegmenter)
+            rng (random.Random, optional): Random source for generation. Defaults
+                to the module-level ``random``, preserving existing behavior. A
+                consumer with its own derived streams injects an instance.
 
         Raises:
             FileNotFoundError: If the name source cannot be resolved to a valid file
         """
         self.segmenter = segmenter or FantasyNameSegmenter()
+        self.rng = rng if rng is not None else random
 
         # Resolve the name source to a file path
         self.filename = resolve_name_list(name_source)
@@ -167,12 +171,12 @@ class Generator:
             max_len = 2
 
         for _ in range(100):
-            beginning_name = random.choice(self.names)
+            beginning_name = self.rng.choice(self.names)
             if not beginning_name.syllables:
                 continue
             beginning = str(beginning_name.syllables[0]).capitalize()
 
-            ending_name = random.choice(self.names)
+            ending_name = self.rng.choice(self.names)
             if not ending_name.syllables:
                 continue
             ending = str(ending_name.syllables[-1])
@@ -211,12 +215,12 @@ class Generator:
             max_len = 2
 
         for _ in range(100):
-            beginning_name = random.choice(self.names)
+            beginning_name = self.rng.choice(self.names)
             if not beginning_name.syllables:
                 continue
             beginning = str(beginning_name.syllables[0]).capitalize()
 
-            ending_name = random.choice(self.names)
+            ending_name = self.rng.choice(self.names)
             if not ending_name.syllables:
                 continue
             ending = str(ending_name.syllables[-1])
@@ -224,11 +228,11 @@ class Generator:
             # Generate zero or more intermediate syllables
             middle = ""
             temp_source_names = []
-            for _ in range(random.randint(0, 3)):
-                name = random.choice(self.names)
+            for _ in range(self.rng.randint(0, 3)):
+                name = self.rng.choice(self.names)
                 if name.syllables:
                     temp_source_names.append(name.name)
-                    middle += str(random.choice(name.syllables))
+                    middle += str(self.rng.choice(name.syllables))
 
             candidate = self._remove_repetitions(beginning + middle + ending)
             candidate = candidate.capitalize()
@@ -284,7 +288,7 @@ class Generator:
         """
         # Initialize Bayesian model if not already done
         if self.bayesian_model is None:
-            self.bayesian_model = BayesianModel()
+            self.bayesian_model = BayesianModel(rng=self.rng)
             segmenter_type = type(self.segmenter).__name__
             self.bayesian_model.train(self.names, self.filename, segmenter_type)
 

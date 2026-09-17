@@ -25,15 +25,22 @@ class BayesianModel:
     the same statistical patterns.
     """
 
-    def __init__(self, cache_adapter: Optional[CacheAdapter] = None):
+    def __init__(
+        self,
+        cache_adapter: Optional[CacheAdapter] = None,
+        rng: Optional[random.Random] = None,
+    ):
         """
         Initialize the Bayesian model.
 
         Args:
             cache_adapter (Optional[CacheAdapter]): Cache adapter for storing
                 probabilities
+            rng (Optional[random.Random]): Random source. Defaults to the
+                module-level ``random``.
         """
         self.cache_adapter = cache_adapter or JsonCacheAdapter()
+        self.rng = rng if rng is not None else random
 
         # Transition probabilities: bigram_probs[syllable1][syllable2] = probability
         self.bigram_probs: Dict[str, Dict[str, float]] = defaultdict(dict)
@@ -222,8 +229,8 @@ class BayesianModel:
         items = list(probabilities.keys())
         weights = list(probabilities.values())
 
-        # Use random.choices for weighted selection
-        return random.choices(items, weights=weights, k=1)[0]
+        # Use weighted selection for reproducible sampling
+        return self.rng.choices(items, weights=weights, k=1)[0]
 
     @staticmethod
     def _fit_to_budget(
@@ -325,7 +332,7 @@ class BayesianModel:
             if max_chars:
                 consumed = used / max_chars
                 end_probability = min(1.0, end_probability / max(0.1, 1.0 - consumed))
-            if random.random() < end_probability and len(sequence) >= 2:
+            if self.rng.random() < end_probability and len(sequence) >= 2:
                 break
 
         return sequence
