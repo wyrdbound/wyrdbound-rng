@@ -45,8 +45,35 @@ class Generator:
         loader = NameFileLoader(self.segmenter)
         self.names = loader.load(self.filename)
 
+        # Mean syllable length drives the syllable budget at generation time;
+        # the corpora average ~2.45 characters, not the hardcoded 3.
+        all_syllables = [
+            str(syllable) for name in self.names for syllable in name.syllables
+        ]
+        self.mean_syllable_length = (
+            sum(len(syllable) for syllable in all_syllables) / len(all_syllables)
+            if all_syllables
+            else 3.0
+        )
+
         # Initialize Bayesian model (lazy loading)
         self.bayesian_model = None
+
+    def _syllable_budget(self, max_len, mean_syllable_length=None):
+        """
+        Derive a syllable ceiling from the character cap and the corpus.
+
+        Args:
+            max_len (int): Maximum character length for the name
+            mean_syllable_length (float): Mean syllable length to use; defaults
+                to the loaded corpus's measurement
+
+        Returns:
+            int: Maximum syllable count, at least 2
+        """
+        mean = mean_syllable_length or self.mean_syllable_length
+        per_syllable = max(1.0, mean)
+        return max(2, int(max_len / per_syllable))
 
     def generate(
         self, n, max_chars=15, algorithm="very_simple", min_probability_threshold=1.0e-8
@@ -237,9 +264,9 @@ class Generator:
         if max_len < 2:
             max_len = 2
 
-        # Calculate approximate max syllables based on average syllable length
-        # Assume average syllable is ~3 characters
-        max_syllables = max(2, max_len // 3)
+        # Syllable ceiling derived from the corpus's mean syllable length
+        # (the ancestry corpora average ~2.45), not a hardcoded 3.
+        max_syllables = self._syllable_budget(max_len)
 
         # Minimum probability threshold to filter out very low-quality names
         # min_probability_threshold = 1.0e-8
@@ -253,8 +280,11 @@ class Generator:
             try:
                 # Generate syllable sequence
                 syllables = self.bayesian_model.generate_syllable_sequence(
-                    max_syllables
+                    max_syllables, max_chars=max_len
                 )
+                if not syllables:
+                    attempts += 1
+                    continue
 
                 # Join syllables to form name
                 full_name = "".join(syllables)

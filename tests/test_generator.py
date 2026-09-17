@@ -181,3 +181,65 @@ class TestPronounceable:
         for _ in range(200):
             name = generator.generate_name(11, "bayesian")
             assert self._is_pronounceable(name.name) is True, name.name
+
+
+class TestLengthBudget:
+    """Length control is budget-aware, not sample-and-discard.
+
+    ``max_syllables`` is derived from the loaded corpus's mean syllable
+    length (the ancestry corpora average 2.45 characters, not the hardcoded
+    3), and the sequence generator is conditioned on the remaining character
+    budget so it terminates naturally rather than being rejected and retried.
+    """
+
+    def test_budget_scales_with_mean_syllable_length(self):
+        short = Generator("ancestry-dwarf-male")
+        assert short.mean_syllable_length < 2.6
+
+        # A corpus averaging 3.6 characters per syllable must get a smaller
+        # syllable budget than the real 2.45-character corpus at the same cap.
+        assert short._syllable_budget(11, 2.45) > short._syllable_budget(11, 3.6)
+
+    def test_mean_syllable_length_is_measured_from_corpus(self):
+        generator = Generator("ancestry-dwarf-male")
+        all_syllables = [
+            str(syllable) for name in generator.names for syllable in name.syllables
+        ]
+        expected = sum(len(s) for s in all_syllables) / len(all_syllables)
+        assert generator.mean_syllable_length == expected
+
+    def test_sequence_never_exceeds_character_budget(self):
+        generator = Generator("ancestry-dwarf-male")
+        generator.generate_name(11, "bayesian")  # train the model
+        model = generator.bayesian_model
+        for max_chars in (5, 7, 9, 11):
+            for _ in range(100):
+                syllables = model.generate_syllable_sequence(
+                    generator._syllable_budget(max_chars),
+                    max_chars=max_chars,
+                )
+                assert len("".join(syllables)) <= max_chars
+
+    def test_mean_attempts_drops_at_tight_cap(self):
+        generator = Generator("ancestry-dwarf-male")
+        generator.generate_name(11, "bayesian")  # train the model
+
+        calls = [0]
+        original = generator.bayesian_model.generate_syllable_sequence
+
+        def counting(*args, **kwargs):
+            calls[0] += 1
+            return original(*args, **kwargs)
+
+        generator.bayesian_model.generate_syllable_sequence = counting
+
+        total = 0
+        for _ in range(200):
+            calls[0] = 0
+            # Threshold disabled so this measures length control alone: with
+            # rejection sampling this averaged 1.66 attempts at this cap.
+            name = generator.generate_name(5, "bayesian", min_probability_threshold=0.0)
+            assert len(name.name) <= 5
+            total += calls[0]
+
+        assert total / 200 < 1.3

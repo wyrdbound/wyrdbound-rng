@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`WYRDBOUND_RNG_DATA_DIR` environment override**: Point the resolver at a custom corpora directory without passing a file path.
 
 ### Changed
+- **Budget-aware Bayesian length control**: `max_syllables` is now derived from the loaded corpus's measured mean syllable length rather than a hardcoded three characters per syllable, and `generate_syllable_sequence` accepts a remaining-character budget. Candidates that would exceed the budget are masked out and renormalised, and the end probability scales up as the budget depletes, so longer names terminate naturally instead of being rejected and retried. Mean attempts at `max_len=5` drop from 1.66 to 1.01 (threshold disabled) with zero over-length names.
 - **One source of truth for built-in name data**: Removed the vestigial root `data/` directory. `src/wyrdbound_rng/data/` is now the only data directory; it is what ships in the wheel. The resolver's dead root-`data/` fallback is replaced by the environment override.
 - **Improved Bayesian Model Logging**: Converted print statements in Bayesian model to proper DEBUG level logging, allowing users to inject custom loggers and control output verbosity ([#5](https://github.com/wyrdbound/wyrdbound-rng/pull/5))
   - Print statements replaced with `logger.debug()` calls

@@ -225,12 +225,55 @@ class BayesianModel:
         # Use random.choices for weighted selection
         return random.choices(items, weights=weights, k=1)[0]
 
-    def generate_syllable_sequence(self, max_syllables: int = 5) -> List[str]:
+    @staticmethod
+    def _fit_to_budget(
+        probabilities: Dict[str, float], max_chars: Optional[int], used: int
+    ) -> Dict[str, float]:
+        """
+        Mask a candidate distribution to syllables that fit the remaining budget.
+
+        Args:
+            probabilities (Dict[str, float]): Candidate syllable -> probability
+            max_chars (Optional[int]): Total character budget, or None for no cap
+            used (int): Characters already consumed
+
+        Returns:
+            Dict[str, float]: The fitting candidates, renormalised. Empty if the
+                budget is exhausted.
+        """
+        if max_chars is None:
+            return probabilities
+
+        remaining = max_chars - used
+        fitting = {
+            syllable: probability
+            for syllable, probability in probabilities.items()
+            if len(syllable) <= remaining
+        }
+        if not fitting:
+            return {}
+
+        total = sum(fitting.values())
+        if total <= 0:
+            return {}
+        return {syllable: value / total for syllable, value in fitting.items()}
+
+    def generate_syllable_sequence(
+        self, max_syllables: int = 5, max_chars: Optional[int] = None
+    ) -> List[str]:
         """
         Generate a sequence of syllables using the trained probabilities.
 
+        The sequence is conditioned on a character budget rather than being
+        filtered after the fact: at each step the candidate distribution is
+        masked to syllables that fit the remaining budget and renormalised, and
+        the end probability is scaled up as the budget depletes so the sequence
+        terminates naturally. If masking empties the candidate set, the
+        sequence ends there.
+
         Args:
             max_syllables (int): Maximum number of syllables to generate
+            max_chars (Optional[int]): Maximum joined length, or None for no cap
 
         Returns:
             List[str]: List of syllables forming a name
@@ -241,11 +284,19 @@ class BayesianModel:
         if not self.syllables:
             raise RuntimeError("No syllables available for generation")
 
-        sequence = []
+        sequence: List[str] = []
+        used = 0
 
         # Choose starting syllable based on start probabilities
-        current_syllable = self._weighted_random_choice(self.start_probs)
+        start_probs = self._fit_to_budget(self.start_probs, max_chars, used)
+        if not start_probs:
+            # Nothing fits the budget; ending here beats emitting a name the
+            # caller would have to reject.
+            return sequence
+
+        current_syllable = self._weighted_random_choice(start_probs)
         sequence.append(current_syllable)
+        used += len(current_syllable)
 
         # Generate subsequent syllables
         for _ in range(max_syllables - 1):
@@ -256,13 +307,24 @@ class BayesianModel:
                 # Fallback to uniform distribution if no transitions found
                 next_probs = {syl: 1.0 / len(self.syllables) for syl in self.syllables}
 
+            next_probs = self._fit_to_budget(next_probs, max_chars, used)
+            if not next_probs:
+                # Budget exhausted: end rather than emitting an incoherent tail
+                break
+
             # Choose next syllable
             next_syllable = self._weighted_random_choice(next_probs)
             sequence.append(next_syllable)
+            used += len(next_syllable)
             current_syllable = next_syllable
 
-            # Check if we should end based on end probabilities
+            # Check if we should end based on end probabilities. As the budget
+            # depletes the pressure to stop rises, so the sequence terminates
+            # on its own instead of running to the character cap.
             end_probability = self.end_probs.get(current_syllable, 0.1)
+            if max_chars:
+                consumed = used / max_chars
+                end_probability = min(1.0, end_probability / max(0.1, 1.0 - consumed))
             if random.random() < end_probability and len(sequence) >= 2:
                 break
 
