@@ -1626,8 +1626,9 @@ CORPORA = {
             "Welsh name elements (composed, not transcribed)",
             "Names attested in the Mabinogion and Welsh Triads (public domain)",
         ],
-        "build": lambda: compose(WELSH_FIRST, WELSH_FEMALE_SECOND)
-        + WELSH_FEMALE_SIMPLE,
+        "build": lambda: (
+            compose(WELSH_FIRST, WELSH_FEMALE_SECOND) + WELSH_FEMALE_SIMPLE
+        ),
     },
     "ancestry-halfling-male": {
         "description": (
@@ -1639,8 +1640,9 @@ CORPORA = {
             "Hypocoristic forms recorded in English manorial and poll tax rolls "
             "(public domain)",
         ],
-        "build": lambda: compose(EN_MALE_STEM, EN_MALE_SUFFIX, min_first=3)
-        + EN_MALE_SIMPLE,
+        "build": lambda: (
+            compose(EN_MALE_STEM, EN_MALE_SUFFIX, min_first=3) + EN_MALE_SIMPLE
+        ),
     },
     "ancestry-halfling-female": {
         "description": (
@@ -1652,8 +1654,9 @@ CORPORA = {
             "Hypocoristic forms recorded in English manorial and poll tax rolls "
             "(public domain)",
         ],
-        "build": lambda: compose(EN_FEMALE_STEM, EN_FEMALE_SUFFIX, min_first=3)
-        + EN_FEMALE_SIMPLE,
+        "build": lambda: (
+            compose(EN_FEMALE_STEM, EN_FEMALE_SUFFIX, min_first=3) + EN_FEMALE_SIMPLE
+        ),
     },
     "ancestry-human-male": {
         "description": (
