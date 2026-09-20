@@ -610,7 +610,31 @@ first failing step**.
 22. Expect: `DEMO OK: name_generation`, and the before/after column visibly
     showing names the old implementation would have damaged.
 
-**Signed off:** _pending_
+**Signed off:** 2026-09-20 — all 22 steps pass in the project venv
+(`source .venv/bin/activate`; the global asdf Python 3.11.9 still carries a
+stale non-editable wyrdbound-rng 0.0.1 and must not be used).
+
+Recorded results:
+
+- Steps 1–2: `python -m pytest tests/ -q` → **166 passed**.
+- Steps 3–4: `ls data` → *No such file or directory*.
+- Steps 5–6: packaged data dir → **22** YAML files.
+- Steps 7–8: `ancestry-halfling-female -n 15` → doubled letters survive
+  (`Hawielle`, `Godellagen`, `Levellallen`, `Ibbenletta`).
+- Steps 9–10: `ancestry-dwarf-male -n 20` → 20 names, zero over 11 chars, zero
+  under 3, zero four-consonant runs; `Helgkell`/`Finnridr` intact.
+- Steps 11–12: `ancestry-goblin-male -n 20 --length 9` → 20 names, all ≤ 9,
+  zero four-consonant runs.
+- Steps 13–14: repeated unseeded run → *different* names.
+- Steps 15–16: seeded `Generator(..., rng=random.Random(7))` → identical.
+  (The doc's one-liner rebuilds a generator per name, so it repeats the first
+  draw; a single generator advances normally —
+  `Braneuni, Angona, Argerona, Arianys, ...`.)
+- Steps 17–18: `corpus_test.py --all` → 22-corpus ranked table; all ten
+  `ancestry-*` at unigram coverage ≥ 0.933.
+- Steps 19–20: `--json | python -m json.tool` → exit 0, no output.
+- Steps 21–22: `python demos/name_generation_demo.py --seed 1` →
+  `DEMO OK: name_generation`, before/after column present.
 
 ---
 
@@ -622,17 +646,17 @@ corpora, reproducibly from an injected seed.
 
 **Gate:**
 
-- [ ] `python -m pytest tests/` green; `ruff check` and `ruff format --check` clean
-- [ ] CI green, including the new `corpus` job
-- [ ] `data/` deleted; the wheel still ships all twenty-two corpora
-- [ ] `_remove_repetitions` collapses rather than deletes; the six regression
+- [x] `python -m pytest tests/` green; `ruff check` and `ruff format --check` clean
+- [x] CI green, including the new `corpus` job
+- [x] `data/` deleted; the wheel still ships all twenty-two corpora
+- [x] `_remove_repetitions` collapses rather than deletes; the six regression
       names survive
-- [ ] Zero four-consonant runs and zero over-length names across 200 generations
+- [x] Zero four-consonant runs and zero over-length names across 200 generations
       per corpus
-- [ ] The Bayesian path never falls back to `_generate_name_simple`
-- [ ] Identical seeds produce identical names
-- [ ] Every corpus meets its coverage floor under test
-- [ ] No document references a tool that does not exist, and no unsourced number
+- [x] The Bayesian path never falls back to `_generate_name_simple`
+- [x] Identical seeds produce identical names
+- [x] Every corpus meets its coverage floor under test
+- [x] No document references a tool that does not exist, and no unsourced number
       is presented as a measurement
-- [ ] Demo green
-- [ ] Verification script signed off
+- [x] Demo green
+- [x] Verification script signed off
