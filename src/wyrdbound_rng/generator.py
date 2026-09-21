@@ -60,8 +60,135 @@ class Generator:
             else 3.0
         )
 
+        # The phonotactic inventory the name-validity rule is derived from.
+        self._cluster_inventory = self._build_cluster_inventory()
+
         # Initialize Bayesian model (lazy loading)
         self.bayesian_model = None
+
+    CONSONANT_RUN = re.compile(r"[^aeiouy]+")
+
+    # Below this many names a corpus is too sparse to derive a rule from; the
+    # four-consonant heuristic is the fallback. generic-fantasy-male has 17
+    # names and 27 clusters, generic-fantasy-female 13 and 16, while every
+    # corpus at or above 200 names has an inventory rich enough to use.
+    MIN_NAMES_FOR_INVENTORY = 100
+
+    def _clusters_by_position(self, name):
+        """
+        Inter-nuclear consonant clusters, by position class.
+
+        The unit is the run of consonants between one vowel and the next, plus
+        the word-initial and word-final runs. ``y`` is a vowel, or every Welsh
+        name in ``ancestry-elf-*`` is one long cluster.
+
+        Args:
+            name (str): Name to split
+
+        Returns:
+            dict: Lists of clusters under ``initial``, ``medial`` and ``final``
+        """
+        lowered = name.lower()
+        result = {"initial": [], "medial": [], "final": []}
+        for match in self.CONSONANT_RUN.finditer(lowered):
+            if match.start() == 0:
+                result["initial"].append(match.group())
+            elif match.end() == len(lowered):
+                result["final"].append(match.group())
+            else:
+                result["medial"].append(match.group())
+        return result
+
+    def _build_cluster_inventory(self):
+        """
+        Build the corpus's cluster inventory, by position class.
+
+        Returns:
+            dict: ``initial``/``medial``/``final`` sets, plus ``onset``,
+                ``coda``, ``max_length`` and the source ``names`` count. Empty
+                when the corpus is below ``MIN_NAMES_FOR_INVENTORY``.
+        """
+        if len(self.names) < self.MIN_NAMES_FOR_INVENTORY:
+            return {}
+
+        observed = {"initial": set(), "medial": set(), "final": set()}
+        max_length = 0
+        for name in self.names:
+            for position, clusters in self._clusters_by_position(name.name).items():
+                observed[position].update(clusters)
+                for cluster in clusters:
+                    max_length = max(max_length, len(cluster))
+
+        return {
+            "observed": observed,
+            "onset": set(observed["initial"]),
+            "coda": set(observed["final"]),
+            "max_length": max_length,
+            "names": len(self.names),
+        }
+
+    def _cluster_is_legal(self, cluster, position):
+        """
+        Is a cluster legal at a position class?
+
+        Legal if observed at that class, or if it splits at some point into an
+        attested onset plus an attested coda in either order. The length
+        backstop rejects anything longer than the longest observed cluster:
+        decomposition alone would accept an arbitrarily long chain of pieces.
+
+        Args:
+            cluster (str): The inter-nuclear cluster
+            position (str): ``initial``, ``medial`` or ``final``
+
+        Returns:
+            bool: True if the cluster is legal
+        """
+        inventory = self._cluster_inventory
+        if not inventory:
+            return True
+
+        if len(cluster) > inventory["max_length"]:
+            return False
+        if cluster in inventory["observed"][position]:
+            return True
+
+        onset = inventory["onset"]
+        coda = inventory["coda"]
+        for split in range(1, len(cluster)):
+            prefix, suffix = cluster[:split], cluster[split:]
+            if (prefix in onset and suffix in coda) or (
+                prefix in coda and suffix in onset
+            ):
+                return True
+        return False
+
+    def _is_pronounceable(self, name):
+        """
+        Is the name legal under the corpus's own phonotactics?
+
+        Every inter-nuclear cluster must have been observed in the corpus or
+        decompose into an attested onset plus an attested coda. This replaces
+        the four-consonant heuristic, which was a no-op and measured the wrong
+        unit -- see ``tools/cluster_report.py``.
+
+        A corpus below ``MIN_NAMES_FOR_INVENTORY`` is too sparse to derive a
+        rule from, so it falls back to the four-consonant heuristic rather than
+        rejecting everything.
+
+        Args:
+            name (str): Name to check
+
+        Returns:
+            bool: True if every cluster is legal
+        """
+        if not self._cluster_inventory:
+            return re.search(r"[^aeiouy]{4,}", name.lower()) is None
+
+        for position, clusters in self._clusters_by_position(name).items():
+            for cluster in clusters:
+                if not self._cluster_is_legal(cluster, position):
+                    return False
+        return True
 
     def _syllable_budget(self, max_len, mean_syllable_length=None):
         """
@@ -409,23 +536,6 @@ class Generator:
             self.bayesian_model.train(self.names, self.filename, segmenter_type)
 
         return self.bayesian_model.get_probability_info(syllable)
-
-    def _is_pronounceable(self, name):
-        """
-        Reject names containing a run of four or more consecutive consonants.
-
-        The segmenter emits onset-only syllables (``hr``, ``sv``, ``thj``) that
-        are legal before a vowel (``hr`` + ``afn`` = Hrafn) and broken before a
-        consonant (``hr`` + ``gils`` = Hrgils). ``y`` counts as a vowel so the
-        Welsh names in ``ancestry-elf-*`` survive (Gwyn, Myrddin, Bryn).
-
-        Args:
-            name (str): Name to check
-
-        Returns:
-            bool: True if the name has no four-consonant run
-        """
-        return re.search(r"[^aeiouy]{4,}", name.lower()) is None
 
     def _remove_repetitions(self, name):
         """
