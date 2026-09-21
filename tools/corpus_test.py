@@ -396,6 +396,45 @@ def recommend_size(
 # ---------------------------------------------------------------------------
 
 
+def cluster_rejection_cost(
+    generator: Generator,
+    count: int,
+    algorithm: str,
+    max_length: int,
+    min_probability: float,
+) -> float | None:
+    """Fraction of raw generated candidates the phonotactic rule rejects.
+
+    The rule is an accept condition inside generation, so emitted names are
+    legal by construction and measuring them says nothing. The cost a corpus
+    author actually pays is on the *candidates* the model proposes, so the
+    rule is neutralised for one batch and the batch is then judged. Returns
+    None when the generator has no cluster inventory (small-corpus fallback).
+    """
+    if not getattr(generator, "_cluster_inventory", None):
+        return None
+
+    real = generator._is_pronounceable
+    candidates: list[str] = []
+
+    def capture(name):
+        candidates.append(name)
+        return True
+
+    generator._is_pronounceable = capture
+    try:
+        generator.generate(
+            count, max_length, algorithm, min_probability_threshold=min_probability
+        )
+    finally:
+        generator._is_pronounceable = real
+
+    if not candidates:
+        return None
+    rejected = sum(1 for name in candidates if not real(name))
+    return rejected / len(candidates)
+
+
 def generation_report(
     generator: Generator,
     count: int,
@@ -428,6 +467,11 @@ def generation_report(
         },
         "samples": produced[:20],
     }
+    cost = cluster_rejection_cost(
+        generator, count, algorithm, max_length, min_probability
+    )
+    if cost is not None:
+        report["cluster_rejection_rate"] = cost
     if probs:
         ordered = sorted(probs)
         report["probability"] = {
@@ -605,6 +649,11 @@ def render(report: dict, args) -> None:
             f"  Length       {g['length']['min']}-{g['length']['max']} "
             f"(mean {g['length']['mean']:.1f})"
         )
+        if "cluster_rejection_rate" in g:
+            print(
+                f"  Phonotactics {g['cluster_rejection_rate']:.1%} of raw candidates "
+                f"rejected by the corpus-derived cluster rule"
+            )
         if "probability" in g:
             p = g["probability"]
             print(

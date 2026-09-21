@@ -13,21 +13,26 @@ that matter.
 
 Generations: 400 per corpus, seeded (`0xC0FFEE`), Bayesian, `max_len=11`.
 
+All rejection rates are measured on raw model **candidates**, not on
+emitted names. The rule is an accept condition inside generation, so
+emitted names are legal by construction and measuring them would say
+nothing; the candidates are the cost a corpus author actually pays.
+
 ## Inventory sizes
 
 | corpus | names | initial | medial | final | medial hapaxes | unseen generated clusters | strict whitelist rejects | decomposable rejects |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| ancestry-dwarf-male | 820 | 42 | 278 | 30 | 142 | 17 | 4.8% | 3.2% |
-| ancestry-dwarf-female | 700 | 34 | 254 | 13 | 121 | 28 | 8.8% | 3.0% |
-| ancestry-elf-male | 780 | 22 | 65 | 21 | 31 | 58 | 23.2% | 7.0% |
-| ancestry-elf-female | 620 | 23 | 55 | 9 | 22 | 47 | 23.5% | 4.2% |
-| ancestry-halfling-male | 560 | 20 | 167 | 16 | 83 | 78 | 29.8% | 7.0% |
-| ancestry-halfling-female | 540 | 16 | 49 | 9 | 14 | 41 | 16.0% | 5.0% |
-| ancestry-human-male | 800 | 21 | 197 | 20 | 53 | 23 | 7.2% | 3.5% |
-| ancestry-human-female | 720 | 20 | 183 | 9 | 61 | 15 | 5.0% | 2.8% |
-| ancestry-goblin-male | 700 | 21 | 15 | 18 | 0 | 90 | 63.5% | 2.2% |
-| ancestry-goblin-female | 669 | 21 | 17 | 10 | 0 | 17 | 7.5% | 2.2% |
-| generic-fantasy | 679 | 43 | 143 | 38 | 62 | 6 | 1.5% | 0.2% |
+| ancestry-dwarf-male | 820 | 42 | 278 | 30 | 142 | 6 | 52.2% | 40.8% |
+| ancestry-dwarf-female | 700 | 34 | 254 | 13 | 121 | 19 | 49.0% | 30.1% |
+| ancestry-elf-male | 780 | 22 | 65 | 21 | 31 | 49 | 68.4% | 21.6% |
+| ancestry-elf-female | 620 | 23 | 55 | 9 | 22 | 41 | 58.9% | 17.1% |
+| ancestry-halfling-male | 560 | 20 | 167 | 16 | 83 | 61 | 70.0% | 30.2% |
+| ancestry-halfling-female | 540 | 16 | 49 | 9 | 14 | 29 | 50.4% | 21.5% |
+| ancestry-human-male | 800 | 21 | 197 | 20 | 53 | 13 | 29.4% | 12.1% |
+| ancestry-human-female | 720 | 20 | 183 | 9 | 61 | 5 | 31.7% | 23.9% |
+| ancestry-goblin-male | 700 | 21 | 15 | 18 | 0 | 85 | 85.8% | 18.5% |
+| ancestry-goblin-female | 669 | 21 | 17 | 10 | 0 | 14 | 26.1% | 13.8% |
+| generic-fantasy | 679 | 43 | 143 | 38 | 62 | 7 | 56.5% | 3.9% |
 
 `strict whitelist rejects` is the cost of requiring a generated cluster
 to have been observed in the corpus at the same position class. It is
@@ -36,6 +41,14 @@ corpus has a small junction inventory by construction, so almost every
 novel combination is unseen. `decomposable rejects` is the alternative
 chosen in T-010b: a cluster is legal if it was observed, or if it splits
 into an attested onset plus an attested coda in either order.
+
+The decomposable rule still rejects 8–43% of candidates depending on
+corpus, far more than the ~2% the feature document predicted. That is a
+finding, not a bug: a coherent corpus deliberately has few junk clusters,
+so a novel-but-decomposable combination is common and a novel-and-
+undecomposable one is not rare. Generation still returns a full batch
+(the rule merely resamples) and never rejects a corpus's own names.
+Per-corpus ceilings are recorded in `tests/test_ancestry_corpora.py`.
 
 ## Medial inventory
 
@@ -95,67 +108,46 @@ example name per unseen cluster.
 
 | cluster | example name |
 |---|---|
-| dj | Fridjorn |
 | ffr | Reffrekr |
-| fh | Ofhakrikr |
-| fnd | Hrafndan |
-| hjs | Hjsumvidr |
-| hlg | Hlgautr |
-| khn | Nokhnefr |
-| kjt | Kjteitr |
-| kk | Gaukkalfr |
 | krr | Hunekrr |
 | ljr | Ljrandfastr |
 | llb | Dagkellbodi |
-| ngg | Inggestr |
-| ngk | Ingkarikr |
 | nns | Gunnsaekell |
 | rrl | Geirrlitr |
-| sj | Osjarormr |
 
 ### ancestry-dwarf-female
 
 | cluster | example name |
 |---|---|
-| bbj | Saebbjorg |
 | bjr | Bjrun |
-| ddt | Hloddta |
-| dlf | Gudlfinna |
-| dll | Radllaug |
+| drd | Hallheidrda |
 | drk | Fridrkadlin |
 | ds | Radsinna |
+| gbj | Vigbjorg |
 | gdr | Sigveigdrun |
 | ggn | Hunlauggny |
-| ghh | Vighhervor |
-| glf | Siglfinny |
 | lt | Ultorfinna |
 | nbr | Anbryngerdr |
-| nlb | Brynlborg |
 | nrg | Daglinrg |
 | nth | Branthora |
 | rgd | Hrorgdis |
 | rgg | Borggudunn |
 | rj | Leifvorjot |
-| rkv | Eirkvor |
-| rlg | Styrlgyda |
 | rm | Hjormodny |
 | rth | Jorthorvor |
-| sgb | Sgborg |
 | skg | Iskgerdr |
 | skv | Oskvalheidr |
 | slj | Geirisljot |
-| stk | Gestkolgyda |
 
 ### ancestry-elf-male
 
 | cluster | example name |
 |---|---|
 | dbr | Gwydbrynedd |
-| ddf | Rhyddfarth |
+| dc | Tudceredd |
 | ddh | Rhyddhael |
-| ddl | Ynyddlant |
+| ddm | Eddmacsen |
 | ddn | Rhyddnin |
-| ddr | Ynyddran |
 | ddt | Eddtanwyth |
 | ddv | Rhyddvaan |
 | dgw | Gwydgwengan |
@@ -163,23 +155,15 @@ example name per unseen cluster.
 | ds | Bedsuliel |
 | dt | Gwydtegafon |
 | dtr | Cadtrahafon |
-| fgl | Eifgliel |
-| fh | Eifheilwyth |
-| ht | Trahtudedd |
 | lb | Heilbededd |
 | lc | Haelcaelwen |
 | ld | Gwenwaldael |
-| ldd | Cedfaeldd |
-| ldw | Rhonaeldwal |
 | lgw | Eilgwynwyth |
-| llc | Illcadawg |
 | ln | Derwalnys |
 | ls | Olsuliel |
 | mgw | Emgwynwen |
 | nc | Gloncedlyn |
 | nd | Niafondyn |
-| ngm | Angmerfor |
-| nlw | Madrynlwyn |
 | nn | Merennawg |
 | nrh | Derynrhon |
 | ns | Emlynsion |
@@ -187,8 +171,10 @@ example name per unseen cluster.
 | nv | Tirganvaawg |
 | rb | Tudurbergan |
 | rbr | Arbryn |
-| rdd | Branordd |
 | rgl | Cadorglalyn |
+| rm | Mormerawg |
+| rp | Tegorpengan |
+| sc | Mabiscedgar |
 | sh | Myrishywfor |
 | sl | Sionyslant |
 | sm | Tudismaelwg |
@@ -196,10 +182,7 @@ example name per unseen cluster.
 | sr | Sionysren |
 | srh | Branysrhon |
 | thd | Talwythdant |
-| thf | Cedwythfon |
-| thl | Gwalwythlis |
 | thn | Cledwythnog |
-| thr | Gwalwythryn |
 | wd | Rhiawdael |
 | wdd | Ariawdd |
 | wgg | Myrawggar |
@@ -207,6 +190,7 @@ example name per unseen cluster.
 | wgn | Awgnydd |
 | wgr | Cynawgrerth |
 | wgv | Awgvaawg |
+| wgw | Gerawgwyth |
 | wh | Niawheilwen |
 
 ### ancestry-elf-female
@@ -217,10 +201,8 @@ example name per unseen cluster.
 | dcl | Belrydcleda |
 | ddl | Tanweddleth |
 | ddn | Emweddnel |
-| ddr | Eilweddra |
 | dgw | Cledgwalona |
 | dp | Dyfrydpena |
-| drm | Idrmaelryd |
 | dth | Sulrydthan |
 | lb | Caelberora |
 | lc | Eilcelwy |
@@ -230,13 +212,10 @@ example name per unseen cluster.
 | lv | Branylvaia |
 | nbr | Ianbronwen |
 | nc | Angancarwyn |
-| ndr | Gwydwyndryd |
 | ndw | Rhiendwen |
 | nf | Arienfith |
-| ngs | Angsulwena |
 | nh | Llyrwenhywy |
 | nm | Arienmel |
-| nrl | Helnenrlys |
 | ns | Tegnensela |
 | nv | Bronvaerys |
 | rbr | Eirbranwy |
@@ -259,7 +238,6 @@ example name per unseen cluster.
 | thl | Garethlaeth |
 | thn | Dylithnaeth |
 | thp | Eiraethpena |
-| wc | Hywceinwen |
 
 ### ancestry-halfling-male
 
@@ -274,18 +252,12 @@ example name per unseen cluster.
 | cp | Wicperstan |
 | cph | Nicphilman |
 | cr | Jackricrett |
-| crb | Halricrby |
-| crw | Pipricrwell |
 | cs | Jocsimken |
 | ct | Hobrictamry |
 | ctt | Merrictt |
 | cw | Hicwadstan |
 | dt | Wadtambald |
-| ffh | Jeffhaley |
-| fk | Jefkestett |
-| kl | Hodgekley |
 | kr | Merrbykry |
-| lbg | Milbgeley |
 | lc | Gilcollett |
 | ldb | Nickbaldbas |
 | ldd | Bartbalddon |
@@ -294,7 +266,6 @@ example name per unseen cluster.
 | ldl | Brockbaldle |
 | ldm | Janbaldman |
 | ldn | Hollbaldnet |
-| lh | Philhodgkin |
 | lld | Larkwelldon |
 | llg | Hollgestan |
 | llh | Ellhollwell |
@@ -306,11 +277,8 @@ example name per unseen cluster.
 | mph | Lamphilin |
 | ms | Simsimley |
 | mt | Somtomwell |
-| nbl | Philkinblin |
 | nbr | Perstanbry |
 | nc | Jancuthkyn |
-| ndc | Randcollett |
-| nfk | Garnkynfkin |
 | ngk | Robingkin |
 | nh | Gilinhalkin |
 | np | Hanperwick |
@@ -323,22 +291,15 @@ example name per unseen cluster.
 | rdl | Ellisardley |
 | rdn | Rudardnas |
 | rdr | Philardroby |
-| rrh | Tarrhalman |
+| rds | Godardsimry |
 | sg | Hobasgekin |
 | sgr | Kesgrimbald |
 | sp | Wadasperby |
 | sr | Hollisrowby |
-| srk | Dickasrkin |
-| sst | Cuthasstan |
-| stb | Wickastbald |
-| stw | Kestwadken |
-| tbk | Jeffetbken |
 | tg | Hobotgestan |
-| tkr | Hankotkry |
 | tll | Rowetllard |
-| ttv | Kestettvet |
+| tn | Davetnobkin |
 | tw | Nobotwynric |
-| vs | Davsimry |
 | wj | Gilowjudken |
 | wm | Tibowman |
 | wn | Rowownobman |
@@ -348,10 +309,6 @@ example name per unseen cluster.
 
 | cluster | example name |
 |---|---|
-| dc | Goodcisisa |
-| dm | Godmegice |
-| gf | Megfillisa |
-| gr | Megroselle |
 | ldb | Bettildbisa |
 | ldd | Clemilddowe |
 | ldj | Maldjulelle |
@@ -364,8 +321,6 @@ example name per unseen cluster.
 | lln | Allnisa |
 | llt | Parnelltota |
 | ln | Pernelnelle |
-| ltr | Perneltrild |
-| mmb | Ammbiella |
 | ng | Nellkingode |
 | nll | Mabkinllild |
 | nm | Besskinmild |
@@ -373,10 +328,7 @@ example name per unseen cluster.
 | nr | Fillkinrice |
 | nt | Parnentota |
 | nw | Wenwymice |
-| rf | Parfillelle |
 | rkh | Wymarkhilda |
-| rnr | Pernrosie |
-| ssw | Besswilmota |
 | sw | Neswymella |
 | tb | Petbessina |
 | tc | Nestotcie |
@@ -385,58 +337,35 @@ example name per unseen cluster.
 | tm | Bettillotmy |
 | tn | Annonetna |
 | tp | Milletperna |
-| trt | Petrtota |
-| ttb | Lettbesskin |
 | tw | Levotwymkin |
-| vtk | Levtkin |
 
 ### ancestry-human-male
 
 | cluster | example name |
 |---|---|
-| bm | Ebmegfred |
-| brv | Ebrvald |
+| cb | Hugricbod |
 | cd | Wilricdold |
 | cdr | Ramlacdrand |
-| cdw | Rainlacdwin |
 | cm | Heimlacmold |
 | cn | Landricnand |
 | cv | Lamlacvald |
-| dd | Luddold |
-| ddw | Godboddwin |
-| dgh | Megradgher |
-| dtr | Landaudtric |
 | fn | Gerleifnand |
 | lfn | Godulfnaud |
 | lmg | Hildhelmger |
 | lmh | Ludhelmher |
 | ncl | Isenclin |
-| ngr | Engregmund |
-| nrh | Rainrhelm |
 | rbl | Eberblin |
-| rdd | Wararddolf |
 | rdt | Rolardtold |
-| tbw | Gautbward |
 
 ### ancestry-human-female
 
 | cluster | example name |
 |---|---|
-| cw | Nicwolflede |
-| dfr | Godfridburg |
-| dgw | Adgwina |
 | dt | Odtolde |
-| gp | Regperrette |
-| lgl | Rolglinde |
 | ndt | Manmundteve |
 | nt | Continde |
-| rbw | Warbwinth |
 | rdt | Hardtolde |
-| rll | Ferlle |
-| sd | Ysdenia |
 | tfr | Mahautfrida |
-| ths | Mathsigund |
-| wth | Theowtheia |
 
 ### ancestry-goblin-male
 
@@ -465,7 +394,6 @@ example name per unseen cluster.
 | km | Vrazakmog |
 | kn | Gruraknash |
 | ksh | Zrurokshak |
-| kth | Vragakthuk |
 | kvr | Mogakvrog |
 | kz | Grirukzagak |
 | kzg | Gnazukzg |
@@ -505,16 +433,12 @@ example name per unseen cluster.
 | shm | Grunashmash |
 | shn | Thronashnak |
 | shr | Stanashrash |
-| sht | Grimashtak |
 | tb | Zrukritbok |
 | tg | Grigritguk |
 | tk | Snugritkash |
 | tm | Snakritmurk |
 | tr | Gobitrash |
-| trt | Grugritrt |
-| tth | Snikritthuk |
 | tz | Dugitzagash |
-| tzk | Dugitzk |
 | zgb | Klizgbit |
 | zgg | Snizggok |
 | zgk | Zikizgkurk |
@@ -544,14 +468,11 @@ example name per unseen cluster.
 | kbr | Grukbraza |
 | kz | Zikzagula |
 | rkk | Urkkazisha |
-| sbr | Snusbruzra |
 | shg | Sturkashgob |
 | shk | Dronazashka |
-| shl | Gruzikeshla |
 | shm | Nazashmogi |
 | shn | Thrakeshnik |
 | shr | Urkogashri |
-| sr | Snusrula |
 | zdr | Throzdrokra |
 | zn | Snuznoka |
 
@@ -561,8 +482,9 @@ example name per unseen cluster.
 |---|---|
 | bth | Abthir |
 | chb | Rachbara |
-| rkn | Darkne |
+| mshl | Gruumshlas |
 | ssr | Cassrion |
 | stg | Pastgon |
 | sv | Asvia |
+| zztn | Grazztna |
 
