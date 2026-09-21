@@ -1,0 +1,113 @@
+# Golden list for the corpus-derived phonotactics rule (T-010c).
+#
+# Each entry is checked by tests/test_phonotactics.py against the corpus named
+# in `corpus`. The `reason` is the part that will be forgotten, so it is
+# required. See docs/cluster-baseline.md for the inventories these came from.
+#
+# The rule: a name is legal when every inter-nuclear consonant cluster was
+# observed in the corpus at that position class, or splits into an attested
+# onset plus an attested coda in either order, and no cluster is longer than
+# the longest observed.
+
+accept:
+  - name: Ragnrikr
+    corpus: ancestry-dwarf-male
+    reason: >-
+      Legal novel combination. gnv is attested in Ragnvindr and the sagas have
+      Ragnvaldr and Ragnhildr; the continental cognate Raginrich is attested.
+      gnr is absent from the surface but decomposes g|nr (onset g + coda nr).
+      A rule that rejects this is over-fitted to the corpus surface.
+  - name: Ragnvindr
+    corpus: ancestry-dwarf-male
+    reason: Attested corpus name; gnv is the medial cluster that licenses Ragnrikr.
+  - name: Hrafn
+    corpus: ancestry-dwarf-male
+    reason: >-
+      A vowel-less onset syllable is legal before a vowel. initial hr and final
+      fn are both attested; fn decomposes f|n.
+  - name: Thorbrandr
+    corpus: ancestry-dwarf-male
+    reason: initial th, medial rbr and final ndr are all attested.
+  - name: Steingrimr
+    corpus: ancestry-dwarf-male
+    reason: initial st, medial ngr and final mr are all attested.
+  - name: Eyvindr
+    corpus: ancestry-dwarf-male
+    reason: Attested corpus name; a plain name the rule must not catch.
+  - name: Godellagen
+    corpus: ancestry-halfling-female
+    reason: >-
+      Attested-style doubled ll survives (T-002 regression exhibit); final n and
+      initial g are attested. Guards against a rule that punishes geminates.
+  - name: Gwyn
+    corpus: ancestry-elf-male
+    reason: >-
+      y is a vowel, so the initial cluster is gw, not gwyn. A rule that treats y
+      as a consonant fails every Welsh name in ancestry-elf-*.
+  - name: Bryn
+    corpus: ancestry-elf-male
+    reason: y as a vowel; initial br is attested.
+  - name: Gwydion
+    corpus: ancestry-elf-male
+    reason: y as a vowel in two places; initial gw and medial d are attested.
+  - name: Gwenllian
+    corpus: ancestry-elf-female
+    reason: >-
+      initial gw, medial nll and final n. nll decomposes n|ll (onset n + coda
+      ll); attested Welsh double-l.
+  - name: Thrakaz
+    corpus: ancestry-goblin-male
+    reason: >-
+      The goblin register is meant to be harsh. initial thr is attested, so this
+      must be accepted, not flattened toward the other ancestries.
+  - name: Grugrit
+    corpus: ancestry-goblin-male
+    reason: initial gr and medial gr are both attested goblin clusters.
+  - name: Skarguk
+    corpus: ancestry-goblin-male
+    reason: initial sk and medial rg attested; the harsh register is correct output.
+  - name: Guilhard
+    corpus: ancestry-human-male
+    reason: Attested corpus name; medial lh and final rd attested.
+  - name: Bertrand
+    corpus: ancestry-human-male
+    reason: medial rtr and final nd attested; a name a reader has no trouble with.
+  - name: Bartley
+    corpus: ancestry-halfling-male
+    reason: medial rtl attested; guards against over-rejection of three-clusters.
+
+reject:
+  - name: Hrgils
+    corpus: ancestry-dwarf-male
+    reason: >-
+      initial hrg is three consonants and the old four-consonant rule waved it
+      through, but hrg is unattested and does not decompose (no h + rg, no hr +
+      g as an attested coda). T-003's acceptance criterion named this; its
+      shipped test contradicted it.
+  - name: Svgest
+    corpus: ancestry-dwarf-male
+    reason: >-
+      initial svg and final st are both unattested and neither decomposes.
+      Named in T-003's criterion; the shipped test asserted it accepted.
+  - name: Kjlaugr
+    corpus: ancestry-dwarf-male
+    reason: initial kjl is unattested and does not decompose into attested pieces.
+  - name: Fjglaugr
+    corpus: ancestry-dwarf-male
+    reason: initial fjgl has no attested decomposition and exceeds the length backstop.
+  - name: Thjglamr
+    corpus: ancestry-dwarf-male
+    reason: initial thjgl exceeds the longest observed cluster and does not decompose.
+  - name: Gaukglamr
+    corpus: ancestry-dwarf-male
+    reason: >-
+      medial kgl is unattested and does not decompose. A well-registered name
+      otherwise; the cluster is the only problem.
+  - name: Cwmwl
+    corpus: ancestry-elf-male
+    reason: >-
+      initial cwmwl is a long unattested run of consonants around a w that is
+      not treated as a vowel here. (W is not a vowel in this segmenter.)
+  - name: Gwnrawd
+    corpus: ancestry-elf-male
+    reason: initial gwnr is unattested and too long to decompose within the backstop.
