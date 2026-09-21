@@ -512,7 +512,8 @@ def build_verdict(structure: dict, curve: Sequence[dict], gen: dict, args) -> di
         check(
             "saturation",
             my <= args.saturation_yield,
-            f"{my:.1f} new syllables per 50 names (saturated at <= {args.saturation_yield:.0f})",
+            f"{my:.1f} new syllables per 50 names "
+            f"(saturated at <= {args.saturation_yield:.0f})",
         )
 
     if gen.get("produced"):
@@ -603,7 +604,8 @@ def render(report: dict, args) -> None:
     if curve:
         print("Saturation")
         print(
-            f"  {'names':>7}  {'syllables':>10}  {'pairs':>7}  {'uni cov':>8}  {'bi cov':>7}"
+            f"  {'names':>7}  {'syllables':>10}  {'pairs':>7}  "
+            f"{'uni cov':>8}  {'bi cov':>7}"
         )
         for row in curve:
             print(
@@ -621,7 +623,8 @@ def render(report: dict, args) -> None:
         rec = report["recommendation"][key]
         if rec["achieved"] >= rec["target"]:
             print(
-                f"  {label:<8} target {rec['target']:.2f} met at {s['total_names']} names"
+                f"  {label:<8} target {rec['target']:.2f} met at "
+                f"{s['total_names']} names"
             )
         elif rec.get("needed") is None:
             note = rec.get("note", "could not fit a reliable curve")
@@ -814,7 +817,9 @@ def main() -> int:
         "--target-bigram-coverage",
         type=float,
         default=DEFAULT_TARGET_BIGRAM_COVERAGE,
-        help=f"Target syllable-pair coverage (default: {DEFAULT_TARGET_BIGRAM_COVERAGE})",
+        help=(
+            f"Target syllable-pair coverage (default: {DEFAULT_TARGET_BIGRAM_COVERAGE})"
+        ),
     )
     parser.add_argument(
         "--min-novelty",
