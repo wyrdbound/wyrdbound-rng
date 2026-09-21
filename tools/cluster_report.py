@@ -175,18 +175,23 @@ def analyze(source: str, generations: int = GENERATIONS, seed: int = SEED) -> di
             if cluster not in all_corpus_clusters and cluster not in unseen:
                 unseen[cluster] = name
 
-    # Strict whole-cluster whitelist cost: fraction of generated names whose
-    # cluster set is not entirely attested at the right position class.
-    strict_rejected = 0
-    for name in generated:
-        by_position = clusters_by_position(name)
-        legal = all(
-            cluster in corpus_inventory[position]
-            for position, clusters in by_position.items()
-            for cluster in clusters
-        )
-        if not legal:
-            strict_rejected += 1
+    # All rejection rates are measured on raw model *candidates*. Generation
+    # applies the rule as an accept condition, so emitted names are legal by
+    # construction and measuring them would say nothing; the candidates are
+    # what a corpus author actually pays for.
+    real_is_pronounceable = gen_generator._is_pronounceable
+    candidates: list[str] = []
+
+    def capture(name):
+        candidates.append(name)
+        return True
+
+    gen_generator._is_pronounceable = capture
+    try:
+        for _ in range(generations):
+            gen_generator.generate_name(11, "bayesian")
+    finally:
+        gen_generator._is_pronounceable = real_is_pronounceable
 
     onset = set(corpus_inventory["initial"])
     coda = set(corpus_inventory["final"])
@@ -195,8 +200,21 @@ def analyze(source: str, generations: int = GENERATIONS, seed: int = SEED) -> di
         (len(cluster) for counter in corpus_inventory.values() for cluster in counter),
         default=0,
     )
+
+    # Strict whole-cluster whitelist: every cluster must be attested at its
+    # exact position class.
+    strict_rejected = 0
+    for name in candidates:
+        by_position = clusters_by_position(name)
+        if not all(
+            cluster in corpus_inventory[position]
+            for position, clusters in by_position.items()
+            for cluster in clusters
+        ):
+            strict_rejected += 1
+
     decomposable_rejected = sum(
-        1 for name in generated if not is_legal(name, observed, onset, coda, max_len)
+        1 for name in candidates if not is_legal(name, observed, onset, coda, max_len)
     )
 
     return {
@@ -212,13 +230,16 @@ def analyze(source: str, generations: int = GENERATIONS, seed: int = SEED) -> di
             position: hapaxes(counter) for position, counter in corpus_inventory.items()
         },
         "generated": len(generated),
+        "candidates": len(candidates),
         "generated_sizes": {
             position: len(counter) for position, counter in generated_inventory.items()
         },
         "unseen": unseen,
-        "strict_rejection_rate": strict_rejected / len(generated) if generated else 0.0,
+        "strict_rejection_rate": (
+            strict_rejected / len(candidates) if candidates else 0.0
+        ),
         "decomposable_rejection_rate": (
-            decomposable_rejected / len(generated) if generated else 0.0
+            decomposable_rejected / len(candidates) if candidates else 0.0
         ),
         "max_cluster_length": max_len,
     }
@@ -258,11 +279,11 @@ def render_text(report: dict, top: int = 25) -> None:
     print()
     print(
         f"Strict whole-cluster whitelist would reject "
-        f"{report['strict_rejection_rate']:.1%} of generated names"
+        f"{report['strict_rejection_rate']:.1%} of raw candidates"
     )
     print(
         f"Decomposable rule (onset+coda either order) would reject "
-        f"{report['decomposable_rejection_rate']:.1%} of generated names"
+        f"{report['decomposable_rejection_rate']:.1%} of raw candidates"
     )
     print()
 
@@ -289,6 +310,11 @@ def render_markdown(reports: Sequence[dict], generations: int) -> str:
         "",
         f"Generations: {generations} per corpus, seeded (`0xC0FFEE`), "
         "Bayesian, `max_len=11`.",
+        "",
+        "All rejection rates are measured on raw model **candidates**, not on",
+        "emitted names. The rule is an accept condition inside generation, so",
+        "emitted names are legal by construction and measuring them would say",
+        "nothing; the candidates are the cost a corpus author actually pays.",
         "",
         "## Inventory sizes",
         "",
@@ -317,6 +343,14 @@ def render_markdown(reports: Sequence[dict], generations: int) -> str:
         "novel combination is unseen. `decomposable rejects` is the alternative",
         "chosen in T-010b: a cluster is legal if it was observed, or if it splits",
         "into an attested onset plus an attested coda in either order.",
+        "",
+        "The decomposable rule still rejects 8–43% of candidates depending on",
+        "corpus, far more than the ~2% the feature document predicted. That is a",
+        "finding, not a bug: a coherent corpus deliberately has few junk clusters,",
+        "so a novel-but-decomposable combination is common and a novel-and-",
+        "undecomposable one is not rare. Generation still returns a full batch",
+        "(the rule merely resamples) and never rejects a corpus's own names.",
+        "Per-corpus ceilings are recorded in `tests/test_ancestry_corpora.py`.",
         "",
         "## Medial inventory",
         "",

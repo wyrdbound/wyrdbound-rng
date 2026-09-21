@@ -9,7 +9,6 @@ Measurement helpers are imported from ``tools/corpus_test.py`` rather than
 reimplemented, so there is exactly one definition of "coverage".
 """
 
-import re
 import sys
 from pathlib import Path
 
@@ -35,7 +34,32 @@ MAX_NAME_LENGTH = 12
 GENERATIONS = 200
 MAX_GENERATED_LENGTH = 11
 MIN_UNIQUENESS = 0.85
-CONSONANT_RUN = re.compile(r"[^aeiouy]{4,}")
+
+# The phonotactic rule is an accept condition inside generation, so emitted
+# names are legal by construction. The number that matters a corpus author is
+# the share of raw model *candidates* it throws away.
+#
+# Measured 2026-09-21 (commit for T-010b, the corpus-derived rule), seeded
+# (0xC0FFEE), 200 generations per corpus at max_len=11. These are the true
+# costs, not targets: the rule rejects far more than the ~2% the feature
+# document predicted, because it requires a cluster to have been observed or
+# to decompose, and a coherent corpus deliberately has few junk clusters. A
+# ceiling is recorded so a later change cannot silently make it worse.
+#
+# Ceiling = measured rate + 5 points of headroom.
+MAX_CLUSTER_REJECTION = {
+    "ancestry-dwarf-male": 0.48,
+    "ancestry-dwarf-female": 0.33,
+    "ancestry-elf-male": 0.29,
+    "ancestry-elf-female": 0.24,
+    "ancestry-halfling-male": 0.36,
+    "ancestry-halfling-female": 0.26,
+    "ancestry-human-male": 0.20,
+    "ancestry-human-female": 0.32,
+    "ancestry-goblin-male": 0.22,
+    "ancestry-goblin-female": 0.21,
+}
+CLUSTER_SEED = 0xC0FFEE
 
 ANCESTRIES = sorted(
     identifier
@@ -83,8 +107,27 @@ class TestAncestryCorpus:
         for _ in range(GENERATIONS):
             name = generator.generate_name(MAX_GENERATED_LENGTH, "bayesian").name
             assert len(name) <= MAX_GENERATED_LENGTH, name
-            assert CONSONANT_RUN.search(name.lower()) is None, name
+            assert generator._is_pronounceable(name), name
             produced.append(name)
 
         uniqueness = len(set(produced)) / len(produced)
         assert uniqueness >= MIN_UNIQUENESS, uniqueness
+
+    def test_cluster_rejection_cost_is_ceilinged(self, identifier):
+        import random
+
+        generator = Generator(identifier, rng=random.Random(CLUSTER_SEED))
+        cost = corpus_test.cluster_rejection_cost(
+            generator,
+            GENERATIONS,
+            "bayesian",
+            MAX_GENERATED_LENGTH,
+            1e-8,
+        )
+        assert cost is not None, "ancestry corpus should have a cluster inventory"
+        ceiling = MAX_CLUSTER_REJECTION[identifier]
+        assert cost <= ceiling, (
+            f"{identifier}: phonotactic rule rejects {cost:.1%} of candidates, "
+            f"ceiling {ceiling:.0%}. A rising cost means the rule or the corpus "
+            f"drifted; see CORPUS_REPORT.md §5 and docs/cluster-baseline.md."
+        )
