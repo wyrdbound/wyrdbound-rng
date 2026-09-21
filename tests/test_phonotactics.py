@@ -8,6 +8,8 @@ the whole argument for a decomposable rule and is the part most likely to be
 forgotten.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 import pytest
