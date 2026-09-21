@@ -286,6 +286,20 @@ change in this feature.
 - Zero four-consonant runs across 200 generations from each ancestry corpus.
 - `python -m pytest tests/` green; `ruff` clean.
 
+> **Superseded (2026-09-21, feature `01b` T-010b).** The rule this task specified
+> was replaced by a corpus-derived cluster inventory — see
+> `01b-corpus-derived-phonotactics.md`. Two things are worth recording here:
+>
+> 1. The four-consonant rule turned out to be a **no-op**: 0.0% rejections on
+>    every ancestry corpus once T-004 and T-005 landed, so the guard behind it
+>    was inert.
+> 2. This task's own acceptance criterion said *"`Hrgils`, `Svgest`, `Thjglamr`
+>    are rejected"*, but the tests it shipped asserted `Hrgils` and `Svgest`
+>    **accepted**, because the implementation only rejected four-consonant runs
+>    and `hrg` is three. The tests matched the code instead of the intent. The
+>    contradicting tests were corrected in T-010b and the names now appear in
+>    `tests/data/phonotactics_golden.yaml`.
+
 ---
 
 ### T-004 [TDD] — Budget-aware Bayesian length control

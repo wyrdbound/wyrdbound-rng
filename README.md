@@ -183,6 +183,16 @@ Generator(name_source, segmenter=None, rng=None)
 `min_len` rejects names shorter than the given length (default `3`); it must not
 exceed `max_len`.
 
+**Name validity.** Generated names are validated against a cluster inventory
+derived from the loaded corpus. The unit is the inter-nuclear consonant cluster
+— the run of consonants between one vowel and the next, plus the word-initial
+and word-final runs (`y` counts as a vowel) — and a cluster is legal if it was
+observed in the corpus at that position or splits into an attested onset plus an
+attested coda in either order. This is what lets a legitimate novel combination
+like `Ragnrikr` through (`gnv` is attested in `Ragnvindr`) while rejecting
+`Hrgils`. A corpus below 100 names is too sparse to derive a rule from and falls
+back to the earlier four-consonant heuristic.
+
 #### `GeneratedName`
 
 Represents a generated name with metadata.
