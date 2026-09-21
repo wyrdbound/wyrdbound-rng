@@ -123,8 +123,15 @@ jobs:
           # rather than propagated and only the JSON contract is enforced.
           # Parseable JSON on stdout is the gate; a broken resolver or a crash
           # fails the parse.
-          python tools/corpus_test.py --list ancestry-dwarf-male --json > corpus-report.json
-          status=$?
+          #
+          # The exit code is captured with an if/else, not `cmd; status=$?`:
+          # GitHub runs this under `bash -e`, so a bare command that exits
+          # non-zero aborts the step before `status=$?` can read it.
+          if python tools/corpus_test.py --list ancestry-dwarf-male --json > corpus-report.json; then
+            status=0
+          else
+            status=$?
+          fi
           if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
             echo "corpus_test.py exited $status" >&2
             exit 1
