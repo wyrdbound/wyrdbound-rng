@@ -308,7 +308,38 @@ Still ends `DEMO OK: name_generation`.
 13. `python demos/name_generation_demo.py --seed 1`
 14. Expect: `DEMO OK: name_generation`, with the cluster column populated.
 
-**Signed off:** _pending_
+**Signed off:** 2026-09-21 — all 14 steps pass in the project venv
+(`source .venv/bin/activate`; the global asdf Python 3.11.9 still carries a
+stale non-editable wyrdbound-rng 0.0.1 and must not be used).
+
+Recorded results:
+
+- Steps 1–2: `python -m pytest tests/ -q` → **203 passed**, including
+  `test_phonotactics.py` (27 cases).
+- Steps 3–4: `cluster_report.py --list ancestry-dwarf-male` → medial inventory
+  of 278; **gnv present, gnr absent**.
+- Steps 5–6: probe grid → `Ragnrikr True, Ragnvindr True, Hrafn True; Hrgils
+  False, Svgest False, Gaukglamr False`.
+- Steps 7–8: `ancestry-dwarf-male -n 30` → thirty readable names, including
+  `Ragnrikr`-shaped `Arnrikr`.
+- Steps 9–10: `ancestry-goblin-male -n 30 --length 9` → thirty names, still
+  recognisably goblin (`Snugz`, `Gazagrit`, `Klizg`, `Zruruk`, `Kazathuk`);
+  not flattened toward the other ancestries.
+- Steps 11–12: `corpus_test.py --list ancestry-elf-female` → Generation block
+  now includes `Phonotactics 26.7% of raw candidates rejected`.
+- Steps 13–14: `demos/name_generation_demo.py --seed 1` →
+  `DEMO OK: name_generation`, cluster column populated with observed /
+  decomposed / REJECT verdicts.
+
+**Deviation, per T-010d step 4.** The calibrated rule rejects far more than the
+document predicted (0–1.8%): measured on raw candidates it is 8–42% per corpus.
+The document's own figure came from a strict-whitelist prototype, not this rule.
+Per the instruction not to raise a ceiling until it passes, the rates are
+recorded as measured with five points of headroom (see
+`tests/test_ancestry_corpora.py:MAX_CLUSTER_REJECTION`) and reported in
+`CORPUS_REPORT.md` §5 and `docs/cluster-baseline.md`. The cost is retries, not
+quality: generation still returns a full batch, uniqueness stays at 90–98%, and
+no corpus's own names are rejected.
 
 ---
 
@@ -319,15 +350,15 @@ hardcoded consonant count, with the cost of the rule measured on every corpus.
 
 **Gate:**
 
-- [ ] `python -m pytest tests/` green; `ruff check` and `ruff format --check` clean
-- [ ] CI green
-- [ ] `docs/cluster-baseline.md` committed for eleven corpora
-- [ ] The two tests contradicting T-003's acceptance criteria are corrected
-- [ ] `Hrgils`, `Svgest`, `Gaukglamr`, `Kjlaugr` rejected; `Ragnrikr`,
+- [x] `python -m pytest tests/` green; `ruff check` and `ruff format --check` clean
+- [x] CI green
+- [x] `docs/cluster-baseline.md` committed for eleven corpora
+- [x] The two tests contradicting T-003's acceptance criteria are corrected
+- [x] `Hrgils`, `Svgest`, `Gaukglamr`, `Kjlaugr` rejected; `Ragnrikr`,
       `Ragnvindr`, `Hrafn`, `Thorbrandr` accepted
-- [ ] Golden list of ≥20 entries, `Ragnrikr` among them with its reason
-- [ ] Rejection rate measured on all ten corpora and ceilinged in the suite
-- [ ] Goblin output is still recognisably goblin
-- [ ] `01`'s T-003 annotated as superseded, not rewritten
-- [ ] Demo green
-- [ ] Verification script signed off
+- [x] Golden list of ≥20 entries, `Ragnrikr` among them with its reason
+- [x] Rejection rate measured on all ten corpora and ceilinged in the suite
+- [x] Goblin output is still recognisably goblin
+- [x] `01`'s T-003 annotated as superseded, not rewritten
+- [x] Demo green
+- [x] Verification script signed off
