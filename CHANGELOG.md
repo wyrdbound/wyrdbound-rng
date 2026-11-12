@@ -7,6 +7,23 @@ the entries up to v0.0.12 were written by hand in
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) form. The project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0](https://github.com/wyrdbound/wyrdbound-rng/compare/v0.0.12...v0.1.0) (2026-11-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* installs on Python older than 3.11 are refused; users on those versions stay on 0.0.12.
+
+### Features
+
+* require Python 3.11 or newer ([b645104](https://github.com/wyrdbound/wyrdbound-rng/commit/b6451044aee80a8df5641802746e41e32ad36d9f))
+
+
+### Bug Fixes
+
+* **cli:** report the package version in --version ([9b1f239](https://github.com/wyrdbound/wyrdbound-rng/commit/9b1f239c387586208524b9ec84beee9874272161))
+* report the package version in __version__ ([d57425f](https://github.com/wyrdbound/wyrdbound-rng/commit/d57425f5fcdc3ca36931ab2c0254847f1d270df5))
+
 ## v0.0.12 (2026-09-25)
 
 ### Added
