@@ -5,7 +5,7 @@ A comprehensive random name generator library for tabletop RPGs, designed to cre
 This library is designed for use in [wyrdbound](https://github.com/wyrdbound), a text-based RPG system that emphasizes narrative and player choice.
 
 [![CI](https://github.com/wyrdbound/wyrdbound-rng/actions/workflows/ci.yml/badge.svg)](https://github.com/wyrdbound/wyrdbound-rng/actions/workflows/ci.yml)
-[![Python 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
