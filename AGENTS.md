@@ -63,7 +63,7 @@ this file, then older history.
 1. **Library-first design.** Every feature starts as a standalone,
    self-contained, independently testable module with a clear name-generation
    purpose. The core library imports only the standard library plus `PyYAML`,
-   and must run on **Python 3.8–3.12+**.
+   and must run on **Python 3.11–3.12+**.
 2. **CLI reachability.** Every user-facing capability is reachable from the CLI:
    args → stdout, errors → stderr. The main entry point is `wyrdbound-rng`;
    advanced tools live under `tools/`. Support both human-readable and `--json`

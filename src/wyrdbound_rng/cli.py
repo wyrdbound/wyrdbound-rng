@@ -6,6 +6,7 @@ Command-line interface for the Wyrdbound Random Name Generator.
 import argparse
 import sys
 
+from . import __version__
 from .generator import Generator
 from .name_list_resolver import format_available_lists
 from .segmenters.fantasy_name_segmenter import FantasyNameSegmenter
@@ -79,7 +80,9 @@ def main():
         help="Show probability information for a specific syllable "
         "(requires bayesian algorithm)",
     )
-    parser.add_argument("--version", action="version", version="%(prog)s 0.0.1")
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
+    )
 
     args = parser.parse_args()
 
