@@ -9,7 +9,7 @@ This library is designed for use in wyrdbound, a text-based RPG system that emph
 narrative and player choice.
 """
 
-__version__ = "0.0.12"  # x-release-please-version
+__version__ = "0.1.0"  # x-release-please-version
 __author__ = "The Wyrd One"
 
 from .bayesian_model import BayesianModel
